@@ -61,7 +61,7 @@ svglib that would consume the following image formats:
 * XFIG
 * Scalable Vector Graphics (SVG)
 
-.. figure:: linux.png
+.. figure:: images/linux.png
    :align: right
    :scale: 30
 
