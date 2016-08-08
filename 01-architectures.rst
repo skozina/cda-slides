@@ -17,6 +17,8 @@ Computer
 * Both code and data in the memory!
 * No-Execute (NX) bit -> Harvard Architecture
 
+.. page::
+
 Registers
 ---------
 

@@ -1,3 +1,5 @@
+.. include:: footer.hdr
+
 ====================
 Binary Code Analysis
 ====================
@@ -27,7 +29,7 @@ Motivation and goals
 
 .. class:: blockquote
 
-*"To present the tools and techniques which allow us to observe the behavior of a modern computer system."*
+    *"To present the tools and techniques which allow us to observe the behavior of a modern computer system."*
 
 * Present tools for observing both the userland and kernel code
 * Take a closer look at the basic system operations

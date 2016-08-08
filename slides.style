@@ -1,12 +1,12 @@
 {"pageSetup": {
     "width": "16cm",
     "height": "10cm",
-    "margin-top": "2mm",
+    "margin-top": "0mm",
     "margin-bottom": "0mm",
-    "margin-left": ".5cm",
-    "margin-right": "1cm",
+    "margin-left": "0cm",
+    "margin-right": "0cm",
     "margin-gutter": "0cm",
-    "spacing-header": "2mm",
+    "spacing-header": "0mm",
     "spacing-footer": "0mm",
     "firstTemplate": "coverPage"
   },
@@ -15,9 +15,26 @@
       "frames": [
           ["0cm", "0cm", "100%", "100%"]
       ],
-      "showHeader" : false,
-      "showFooter" : true,
-      "alignment": "TA_CENTER"
+      "alignment": "TA_CENTER",
+      "showFooter": "true"
     }
-  }
+  },
+  "styles" : [
+    ["noborder", {
+      "commands": [
+      ]
+    }],
+    ["footer", {
+      "textColor": "lightgrey"
+    }],
+    ["blockquote", {
+      "borderPadding": 50,
+      "margin-top": 20
+    }],
+    ["heading1", {
+      "textColor": "green",
+      "backColor": "lightyellow",
+      "borderPadding": 5
+    }]
+  ]
 }
