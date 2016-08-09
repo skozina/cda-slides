@@ -56,6 +56,12 @@ Syllabus of lectures:
 2. Compilation, linking, and running code. Examples of compiler optimizations, stack optimizations (leaf and tail calls, function inlining), linker script, understanding of the Unix binary file (ELF, objdump).
 3. Linux crash dump analysis, DWARF debug symbols, using the crash(8) tool.
 4. Linux crash dump analysis, understanding kernel Oops, kernel flags, sysrq.
+
+.. page::
+
+Syllabus of lectures (cont):
+----------------------------
+
 5. Kernel process and memory management, task_struct, vmas, SLAB allocator.
 6. Interrupt processing, postponing work, bottom halves, softirqs and tasklets, work queues.
 7. Live kernel tracing (SystemTap, ftrace), locks, deadlocks and hangs and their analysis and reconstruction.
@@ -71,6 +77,17 @@ Syllabus of computer exercises:
 4. Crash dump analysis of a Linux system on the AMD64 architecture.
 5. System tracing using SystemTap and ftrace.
 6. Tracing and analysis of system deadlocks. 
+
+.. page::
+
+Required Skills
+-------------------------------
+
+* Basic C language programming (`IZP <http://www.fit.vutbr.cz/study/course-l.php.cs?id=11499>`_)
+* Basic OS overview (`IOS <http://www.fit.vutbr.cz/study/courses/index.php?id=11462>`_)
+* Assembly language (`ISU <http://www.fit.vutbr.cz/study/course-l.php.en?id=11420>`_)
+* English language
+* Basic UNIX shell usage
 
 .. page::
 

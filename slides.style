@@ -16,10 +16,15 @@
           ["0cm", "0cm", "100%", "100%"]
       ],
       "alignment": "TA_CENTER",
-      "showFooter": "true"
+      "showFooter": "false"
     }
   },
   "styles" : [
+    ["base", {
+      "fontSize": 14,
+      "leading": 14,
+      "kerning": true
+    }],
     ["noborder", {
       "commands": [
       ]
@@ -29,7 +34,8 @@
     }],
     ["blockquote", {
       "borderPadding": 50,
-      "margin-top": 20
+      "margin-top": 20,
+      "spaceBefore": 10
     }],
     ["heading1", {
       "textColor": "green",
