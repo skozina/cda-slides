@@ -1,13 +1,25 @@
+
 .. include:: footer.hdr
 
 ====================
 Binary Code Analysis
 ====================
 
+.. raw:: pdf
+
+   Spacer 0,80
+
 .. image:: images/Logo_RH_RGB_Default.png
    :width: 500px
+   :align: left
+
 .. image:: images/FIT_zakladni_provedeni_loga_barva_EN.png
    :width: 500px
+   :align: right
+
+.. raw:: pdf
+
+   PageBreak oneColumn
 
 .. page::
 

@@ -1,3 +1,6 @@
+
+.. include:: footer.hdr
+
 ======================
 Computer architectures
 ======================
@@ -7,6 +10,10 @@ Computer architectures
 * implicit and explicit stack operations
 * The x86 and x86_64 computer architectures, common instructions
 * System V ABI on x86_64 architecture
+
+.. raw:: pdf
+
+   PageBreak oneColumn
 
 .. page::
 
