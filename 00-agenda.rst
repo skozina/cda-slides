@@ -111,3 +111,4 @@ Literature
 * `Hofmann, F.: The Solaris Operating System on x86 Platforms, Crashdump Analysis, Operating System Internals, 2005 <http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/ref/book.pdf>`_
 * `Intel Corporation: Intel 64 and IA-32 Architectures Software Developer Manuals, 2015 <http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html>`_
 * `Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013 <http://www.x86-64.org/documentation/abi.pdf>`_
+* The OSDev wiki (`http://wiki.osdev.org <http://wiki.osdev.org>`_)
