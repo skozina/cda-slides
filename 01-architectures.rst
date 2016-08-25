@@ -11,6 +11,10 @@ Computer architectures
 * implicit and explicit stack operations
 * System V ABI on x86_64 architecture
 
+.. image:: images/Logo_RH_RGB_Default.png
+   :width: 500px
+   :align: left
+
 .. raw:: pdf
 
    PageBreak oneColumn
@@ -57,6 +61,24 @@ Instructions
 
 .. page::
 
+Memory stack
+------------
+
+* Standard data structure for maintaining the program flow
+* Very often the stack grows *down* (so the code can grow up)
+* Specific layout defined by convention
+* Stack frame, stack pointer, base pointer
+* Stack push =
+
+  1) decrement the pointer
+  2) store the value at the pointer
+
+* Implicit vs. explicit stack operations
+
+TODO picture!
+
+.. page::
+
 Registers
 ---------
 
@@ -69,12 +91,63 @@ Registers
 
 .. page::
 
+Usage of registers
+------------------
+
+* Many poins of choise
+
+  - How do we operate stack?
+  - How do we store data on stack?
+  - How do we call functions?
+  - How do we layout data in memory?
+
+* Need consensus, defined by *Application Binary Interface*
+
+   - System V Application Binary Interface
+   - Microsoft x64 calling convention
+
+.. page::
+
+ABI Example
+-----------
+
+.. code-block:: C
+   :linenos: true
+
+    size_t a = sizeof (struct {
+    		char a;
+    		int b;
+    		});
+    printf("%ld\n", a);
+
+.. page::
+
+ABI Example
+-----------
+
+.. code-block:: C
+   :linenos: true
+
+    size_t a = sizeof (struct {
+    		char a;
+    		int b;
+    		});
+    printf("%ld\n", a);
+
+.. code-block:: C
+   :linenos: true
+
+    $ ./a.out
+    8
+
+.. page::
+
 Physical vs. Virtual Memory
 ---------------------------
 
 * A *non-continuous* linear space
 
-  - PCI space, firmware, BIOS, ...
+  - PCI space, firmware, SMM, BIOS, ...
 
 * Usually physical memory not directly accessible
 
@@ -103,6 +176,12 @@ Page tables
 
 .. image:: images/paging.png
   :scale: 200%
+
+.. page::
+
+x86 architecture
+----------------
+
 
 .. page::
 
