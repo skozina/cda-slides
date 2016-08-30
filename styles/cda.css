@@ -9,10 +9,12 @@ div.slide h1 {
 
 #head-logo {
   background: #aa3333;
+  width: auto;
 }
 
 #head-icon {
   background: #aa3333;
+  width: auto;
 }
 
 .red {
