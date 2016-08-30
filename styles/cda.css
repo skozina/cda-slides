@@ -1,6 +1,7 @@
 div.background {
   background-color: #aa3333;
   border-bottom: 0.5em solid #aa0000;
+  padding: 0 0.8em 0 0.8em;
 }
 
 div.slide h1 {
