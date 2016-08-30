@@ -1,0 +1,20 @@
+div.background {
+  background-color: #aa3333;
+  border-bottom: 0.5em solid #aa0000;
+}
+
+div.slide h1 {
+  padding-top: 0.8em;
+}
+
+#head-logo {
+  background: #aa3333;
+}
+
+#head-icon {
+  background: #aa3333;
+}
+
+.red {
+	color: red;
+}

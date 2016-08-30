@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
+<head> 
+  <title>Slide Shows in XHTML</title> 
+  <meta name="copyright" 
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" /> 
+  <link rel="stylesheet" type="text/css" media="screen, projection, print" 
+   href="styles/slidy.css" /> 
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script> 
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background"> 
+  <img id="head-icon" alt="graphic with four colored squares"
+    src="images/FIT_zakladni_provedeni_loga_barva_EN.png" /> 
+  <img src="images/Logo_RH_RGB_Default.png" alt="W3C logo"
+       id="head-logo" />
+</div>
+ 
+<div class="slide cover"> 
+ <img src="graphics/keys.jpg" alt="Cover page images (keys)" class="cover" /> 
+ <br clear="all" />            
+ <h1>Binary Code Analysis</h1> 
+ <p>A totally dummy way to fill paragraph of text.</p> 
+</div> 
+
+<div class="slide">
+<h1>Details</h1>
+<ul>
+<li>Code:   IAN</li>
+<li>Ac.Year:    2016/2017</li>
+<li>Term:   Summer</li>
+<li>Language:   Czech</li>
+<li>Credits:    4</li>
+<li>Completion: classified accreditation</li>
+<li><a href="http://www.fit.vutbr.cz/study/course-l.php.en?id=11309">http://www.fit.vutbr.cz/study/course-l.php.en?id=11309</a></li>
+</ul>
+</div> 
+
+<div class="slide">
+<h1>Motivation and goals</h1>
+<blockquote>To present the tools and techniques which allow us to observe the behavior of a modern computer system.</blockquote>
+<ul>
+<li>Present tools for observing both the userland and kernel code</li>
+<li>Take a closer look at the basic system operations</li>
+<li>Debugg a system crashes from crashdump</li>
+<li>An excellent <a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/">Crash Dump Analysis></a> course at <a href=>http://www.mff.cuni.cz/to.en/">MFF CUNI</a>.</li>
+</ul>
+</div> 
+
+<div class="slide">
+<h1>Motivation and goals</h1>
+<ul>
+<li>Stanislav Kozina <a href="mailto:skozina@redhat.com">&lt;skozina@redhat.com&gt;</a></li>
+<li>Robin Hack <a href="rhack@redhat.com">&lt;rhack@redhat.com&gt;</a></li>
+<li>Michael Petlan <a href="mpetlan@redhat.com">&lt;mpetlan@redhat.com&gt;</a></li>
+<li>Petr Holasek <a href="pholasek@redhat.com">&lt;pholasek@redhat.com&gt;</a></li>
+<li>Ilya Etingof <a href="ietingof@redhat.com">&lt;ietingof@redhat.com&gt;</a></li>
+</ul>
+</div> 
+
+<div class="slide">
+<h1>Syllabus of lectures:</h1>
+<ol>
+<li>Computer architectures in general, registers, implicit and explicit stack operations. The x86 and x86_64 computer architectures, common instructions. System V ABI on x86_64 architecture, red zone.</li>
+<li>Compilation, linking, and running code. Examples of compiler optimizations, stack optimizations (leaf and tail calls, function inlining), linker script, understanding of the Unix binary file (ELF, objdump).</li>
+<li>Linux crash dump analysis, DWARF debug symbols, using the crash(8) tool.</li>
+<li>Linux crash dump analysis, understanding kernel Oops, kernel flags, sysrq.</li>
+</ol>
+</div> 
+
+<div class="slide">
+<h1>Syllabus of lectures (cont):</h1>
+<ol>
+<li>Kernel process and memory management, task_struct, vmas, SLAB allocator.</li>
+<li>Interrupt processing, postponing work, bottom halves, softirqs and tasklets, work queues.</li>
+<li>Live kernel tracing (SystemTap, ftrace), locks, deadlocks and hangs and their analysis and reconstruction.</li>
+</ol>
+</div> 
+
+<div class="slide">
+<h1>Syllabus of computer exercises:</h1>
+<ol>
+<li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
+<li>Using the crash(1) tool on Linux.</li>
+<li>Crash dump analysis of a Linux system on the IA-32 architecture.</li>
+<li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
+<li>System tracing using SystemTap and ftrace.</li>
+<li>Tracing and analysis of system deadlocks. </li>
+</ol>
+</div> 
+
+<div class="slide">
+<h1>Syllabus of computer exercises:</h1>
+<ul>
+<li>Basic C language programming (<a href="http://www.fit.vutbr.cz/study/course-l.php.cs?id=11499">IZP</a>)</li>
+<li>Basic OS overview (<a href="http://www.fit.vutbr.cz/study/courses/index.php?id=11462">IOS</a>)</li>
+<li>Assembly language (<a href="http://www.fit.vutbr.cz/study/course-l.php.en?id=11420">ISU</a>)</li>
+<li>English language</li>
+<li>Basic UNIX shell usage</li>
+</ul>
+</div> 
+
+<div class="slide">
+<h1>Literature</h1>
+<ul>
+<li><a href="http://www.dedoimedo.com/computers/crash-book.html">Ljubuncic, I.: Linux Kernel Crash Book, 2011</a></li>
+<li>Drake, C., Brown, K.: Panic! UNIX System Crash Dump Analysis, Prentice Hall, 1995.</li>
+<li><a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/ref/book.pdf"</a>Hofmann, F.: The Solaris Operating System on x86 Platforms, Crashdump Analysis, Operating System Internals, 2005</li>
+<li><a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html">Intel Corporation: Intel 64 and IA-32 Architectures Software Developer Manuals, 2015</a></li>
+<li><a href="http://www.x86-64.org/documentation/abi.pdf">Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013</a></li>
+<li>The OSDev wiki (http://wiki.osdev.org <http://wiki.osdev.org>)</li>
+</ul>
+</div> 
+
+</body>
+</html>
