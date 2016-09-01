@@ -1,6 +1,13 @@
+body
+{
+  font-family: "overpass";
+  font-size: 20pt;
+  src: url(overpass/Overpass-Regular.ttf);
+}
+
 div.background {
-  background-color: #aa3333;
-  border-bottom: 0.5em solid #aa0000;
+  background-color: #cc0000;
+  border-bottom: 0.5em solid #a30000;
   padding: 0 0.8em 0 0.8em;
 }
 
@@ -8,16 +15,46 @@ div.slide h1 {
   padding-top: 0.8em;
 }
 
+div.slide.cover {
+  background: #a30000 url("../images/background.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+div.slide.cover img.cover {
+   padding-top: 5em;
+   float: left;
+   width: 10em;
+}
+
 #head-logo {
-  background: #aa3333;
+  background: #cc0000;
   width: auto;
 }
 
 #head-icon {
-  background: #aa3333;
+  background: #cc0000;
   width: auto;
+}
+
+ul li { 
+  background: transparent url(../images/bullet.png) no-repeat 5px;
 }
 
 .red {
 	color: red;
 }
+
+div.toolbar {
+  color: #4c4c4c;
+  background-color: #dcdcdc;
+}
+
+div.toolbar span.copyright {
+  color: #4c4c4c;
+}
+
+.toolbar a:link {color: #4c4c4c}
+.toolbar a:visited {color: #4c4c4c}
+.toolbar a:active {color: #4c4c4c}
+.toolbar a:hover {color: #4c4c4c}
