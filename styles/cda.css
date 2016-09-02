@@ -30,6 +30,7 @@ div.slide.cover img.cover {
 #head-logo {
   background: #cc0000;
   width: auto;
+  height: 75%;
 }
 
 #head-icon {
@@ -39,6 +40,24 @@ div.slide.cover img.cover {
 
 ul li { 
   background: transparent url(../images/bullet.png) no-repeat 5px;
+}
+
+table {
+	width: 80%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+table tr.border td {
+	border:0.1em solid black;
+}
+
+table tr td.dark {
+	background-color: #dcdcdc;
+}
+
+img.right {
+	float: right;
 }
 
 .red {

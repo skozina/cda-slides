@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
+<head> 
+  <title>Binary Code Analysis - Agenda</title> 
+  <meta name="copyright" 
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" /> 
+  <link rel="stylesheet" type="text/css" media="screen, projection, print" 
+   href="styles/slidy.css" /> 
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script> 
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background"> 
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" /> 
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+ 
+<div class="slide cover"> 
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" /> 
+ <br clear="all" />            
+ <h1>Binary Code Analysis</h1> 
+ <h2>Computer Architectures</h2>
+ <p>Stanislav Kozina<br>
+ Associate Manager, Software Engineering, Red Hat<br>
+ &copy; January 2016</p> 
+</div> 
+
+<div class="slide">
+	<h1>Agenda></h1>
+	<ul>
+		<li>Computer architectures in general</li>
+		<li>registers</li>
+		<li>The x86 and x86_64 computer architectures, common instructions</li>
+		<li>implicit and explicit stack operations</li>
+		<li>System V ABI on x86_64 architecture</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Agenda</h1>
+	<ul>
+		<li>Computer architectures in general</li>
+		<li>registers</li>
+		<li><span class="red">The x86 and x86_64 computer architectures</span>, common instructions</li>
+		<li>implicit and explicit stack operations</li>
+		<li>System V ABI on x86_64 architecture</span></li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>x86_64 history</h1>
+	<img class="right" alt="Seattle Computer" src="images/Seattle_Computer_8086-2.jpg"/> 
+	<ul>
+		<li>1978: Intel 8086, 16bit, 20bit addressing, only real mode</li>
+		<li>1982: Intel 80286, 16bit, 24bit addressing, Protected
+			mode, MMU (Paging!)</li>
+		<li>1985: Intel 80386, 32bit, known as IA32 (x86)</li>
+		<li>2003: AMD Athlon 64, 64bit, 40bit addressing, known as AMD64 (x86_64)</li>
+			<ul>
+				<li>Do <em>NOT</em> confuse with IA64!</li>
+				<li>That's Intel Itanium</li>
+			</ul>
+		<li>Today: Intel Kaby Lake, 64bit, 46bit addressing</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>x86_64 features</h1>
+	<ul>
+		<li>FPU, MMX, PAE, SSE, SMP, VT-x, GPU, TSX, &hellip;</li>
+		<li>Full backwards compatibility</li>
+		<ul>
+			<li>Except for segmentation changes, mandatory paging
+				etc.</li>
+		</ul>
+		<li>Little endian</li>
+		<li>Variable instruction length</li>
+		<li>CISC</li>
+		<ul>
+			<li>Many, many instructions, often similar</li>
+			<li>Src/Dst operands can be in memory</li>
+			<li>RISC micro-instructions in the core anyway</li>
+		</ul>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Little Endian</h1>
+	<ul>
+		<li>The way the CPU accesses <em>multi-byte</em> content.</li>
+		<li>Makes difference in communication between different
+			platforms</li>
+		<ul>
+			<li>RPC, Network byte ordering, DMA</li>
+		</ul>
+	</ul>
+	<pre>
+int a = 0x12345678;
+</pre>
+	<pre>
+(gdb) x/4xb &a
+0x60102c &lt;a&gt;:	0x78	0x56	0x34	0x12
+</pre>
+</div>
+
+<div class="slide">
+	<h1>x86 General Purpose Registers (GPR)</h1>
+	<ul>
+		<li>Overlapping access to the single register</li>
+		<li>Based on access width (8/16/32 bits)</li>
+	</ul>
+	<table>
+		<tr>
+			<td>32</td>
+			<td>24</td>
+			<td>16</td>
+			<td>8</td>
+		</tr>
+		<tr class="border">
+			<td colspan=4>%e&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=2 class="dark" style="width=50%;"></td>
+			<td colspan=2>%&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=2 class="dark" style="width=50%;"></td>
+			<td>%&#x2588;h</td>
+			<td>%&#x2588;l</td>
+		</tr>
+	</table>
+	<p>&#x2588; is one of [abcd]</p>
+	<table>
+		<tr>
+			<td>32</td>
+			<td>24</td>
+			<td>16</td>
+			<td>8</td>
+		</tr>
+		<tr class="border">
+			<td colspan=4>%e&#x2588;</td>
+		</tr>
+		<tr class="border">
+			<td colspan=2 class="dark" style="width=50%;"></td>
+			<td colspan=2>%&#x2588;</td>
+		</tr>
+	</table>
+	<p>&#x2588; is one of [di|si|bp|sp|ip]</p>
+</div>
+
+<div class="slide">
+	<h1>x86_64 General Purpose Registers (GPR)</h1>
+	<table>
+		<tr>
+			<td>64</td>
+			<td>56</td>
+			<td>48</td>
+			<td>40</td>
+			<td>32</td>
+			<td>24</td>
+			<td>16</td>
+			<td>8</td>
+		</tr>
+		<tr class="border">
+			<td colspan=8>%r&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=4 class="dark" style="width=50%;"></td>
+			<td colspan=4>%e&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=6 class="dark" style="width=50%;"></td>
+			<td colspan=2>%&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=6 class="dark" style="width=50%;"></td>
+			<td>%&#x2588;h</td>
+			<td>%&#x2588;l</td>
+		</tr>
+	</table>
+	<p>&#x2588; is one of [abcd]</p>
+	<table>
+		<tr>
+			<td>64</td>
+			<td>56</td>
+			<td>48</td>
+			<td>40</td>
+			<td>32</td>
+			<td>24</td>
+			<td>16</td>
+			<td>8</td>
+		</tr>
+		<tr class="border">
+			<td colspan=8>%r&#x2588;</td>
+		</tr>
+		<tr class="border">
+			<td colspan=4 class="dark" style="width=50%;"></td>
+			<td colspan=4>%e&#x2588;x</td>
+		</tr>
+		<tr class="border">
+			<td colspan=6 class="dark" style="width=50%;"></td>
+			<td colspan=2>%&#x2588;</td>
+		</tr>
+		<tr class="border">
+			<td colspan=7 class="dark" style="width=50%;"></td>
+			<td>%&#x2588;l</td>
+		</tr>
+	</table>
+	<p>&#x2588; is one of [di|si|bp|sp]</p>
+	<p>Also, %rip / %eip / %ip available for reading</p>
+</div>
+
+<div class="slide">
+	<h1>x86_64 General Purpose Registers (GPR) cont.</h1>
+	<table>
+		<tr>
+			<td>64</td>
+			<td>56</td>
+			<td>48</td>
+			<td>40</td>
+			<td>32</td>
+			<td>24</td>
+			<td>16</td>
+			<td>8</td>
+		</tr>
+		<tr class="border">
+			<td colspan=8>%r&#x2588;</td>
+		</tr>
+		<tr class="border">
+			<td colspan=4 class="dark" style="width=50%;"></td>
+			<td colspan=4>%r&#x2588;d</td>
+		</tr>
+		<tr class="border">
+			<td colspan=6 class="dark" style="width=50%;"></td>
+			<td colspan=2>%r&#x2588;w</td>
+		</tr>
+		<tr class="border">
+			<td colspan=7 class="dark" style="width=50%;"></td>
+			<td>r%&#x2588;b</td>
+		</tr>
+	</table>
+	<p>&#x2588; is one of [8|9|10|11|12|13|14|15]</p>
+</div>
+
+</body>
+</html>
