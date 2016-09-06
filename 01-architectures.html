@@ -54,7 +54,7 @@
 </div>
 
 <div class="slide">
-	<h1>x86_64 history</h1>
+	<h1>History</h1>
 	<img class="right" alt="Seattle Computer" src="images/Seattle_Computer_8086-2.jpg"/> 
 	<ul>
 		<li>1978: Intel 8086, 16bit, 20bit addressing, only real mode</li>
@@ -71,7 +71,7 @@
 </div>
 
 <div class="slide">
-	<h1>x86_64 features</h1>
+	<h1>Features</h1>
 	<ul>
 		<li>FPU, MMX, PAE, SSE, SMP, VT-x, GPU, TSX, &hellip;</li>
 		<li>Full backwards compatibility</li>
@@ -110,7 +110,7 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-	<h1>x86 General Purpose Registers (GPR)</h1>
+	<h1>32-bit General Purpose Registers (GPR)</h1>
 	<ul>
 		<li>Overlapping access to the single register</li>
 		<li>Based on access width (8/16/32 bits)</li>
@@ -151,11 +151,11 @@ int a = 0x12345678;
 			<td colspan=2>%&#x2588;</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [di|si|bp|sp|ip]</p>
+	<p>&#x2588; is one of [di|si|bp|sp]</p>
 </div>
 
 <div class="slide">
-	<h1>x86_64 General Purpose Registers (GPR)</h1>
+	<h1>64-bit General Purpose Registers (GPR)</h1>
 	<table>
 		<tr>
 			<td>64</td>
@@ -201,7 +201,7 @@ int a = 0x12345678;
 		</tr>
 		<tr class="border">
 			<td colspan=4 class="dark" style="width=50%;"></td>
-			<td colspan=4>%e&#x2588;x</td>
+			<td colspan=4>%e&#x2588;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
@@ -213,11 +213,12 @@ int a = 0x12345678;
 		</tr>
 	</table>
 	<p>&#x2588; is one of [di|si|bp|sp]</p>
-	<p>Also, %rip / %eip / %ip available for reading</p>
+	<p>Also, %rip / %eip / %ip pointing to the <em>next</em> instruction to
+	execute is available for reading</p>
 </div>
 
 <div class="slide">
-	<h1>x86_64 General Purpose Registers (GPR) cont.</h1>
+	<h1>64-bit General Purpose Registers (GPR) cont.</h1>
 	<table>
 		<tr>
 			<td>64</td>
@@ -246,6 +247,111 @@ int a = 0x12345678;
 		</tr>
 	</table>
 	<p>&#x2588; is one of [8|9|10|11|12|13|14|15]</p>
+</div>
+
+<div class="slide">
+	<h1>Stack and Instruction Registers</h1>
+	<ul>
+		<li><em>RSP</em> - Stack Pointer, points to the <em>top</em> of the stack</li>
+		<ul>
+			<li>But stack grows <em>down</em>!</li>
+			<li>Operated by push/pop instructions</li>
+		</ul>
+		<li><em>RBP</em> - Base Pointer</li>
+		<ul>
+			<li>Base of this function's Stack Frame</li>
+		</ul>
+		<li><em>RIP</em> - Instruction Pointer</li>
+		<ul>
+			<li>Points to the byte <em>after</em> currently executed instruction</li>
+			<li>Operated by call, jmp instructions</li>
+			<li>Available for read-only (64-bit only)</li>
+		</ul>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Memory Management</h1>
+	<ul>
+		<li>All instructions operate on <em>Virtual Memory</em></li>
+		<ul>
+			<li>VM is non-contiguous (depends on mapping) 64-bit linear address space</li>
+		</ul>
+		<li>VM is mapped to <em>Physical Memory</em></li>
+		<ul>
+			<li>PM is non-contiguous too (PCI space, SMM, &hellip;</li>
+		</ul>
+		<li>x86 supports two modes of VMM:</li>
+		<ul>
+			<li><em>Segmentation</em> - whole PM split between </em>segments</em></li>
+			<li><em>Paging</em> - Each Virtual Page is mapped to given Physical Page</li>
+			<li>Neither of it can be turned off!</li>
+			<ul>
+			<li>&hellip; but can be made transparent</li>
+			</ul>
+		</ul>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Memory Management (cont.)</h1>
+	<img class="fill" alt="x86 VMM" src="images/x86-vmm.png"/> 
+</div>
+
+<div class="slide">
+	<h1>Segment Registers</h1>
+	<ul>
+		<li>Six 16-bit segment selector registers available:</li>
+		<ul>
+			<li><em>cs</em> - Code Segment</li>
+			<li><em>ss</em> - Stack Segment</li>
+			<li><em>ds</em> - Data Segment</li>
+			<li><em>es, fs, gs</em> - Additional Data Segments</li>
+		</ul>
+	</ul>
+	<table>
+		<tr>
+			<td colspan=14>15</td>
+			<td>2</td>
+			<td colspan=2>1</td>
+		</tr>
+		<tr class="border">
+			<td colspan=14>Index</td>
+			<td>TI</td>
+			<td colspan=2>RPL</td>
+		</tr>
+	</table>
+	<p><em>Index</em> - Offset / 8 into the Segment Descriptor Table</p>
+	<p><em>TI</em> - Table Indicator: 0 GDT, 1 LDT</p>
+	<p><em>RPL</em> - Requested Privilege Level</p>
+</div>
+
+<div class="slide">
+	<h1>Base Address Registers</h1>
+	<ul>
+		<li>80-bit width pointers to the base of the table:</li>
+		<ul>
+			<li><em>GDTR</em> - Global Descriptor Table Register</li>
+			<li><em>LDTR</em> - Local Descriptor Table Register (obsolete)</li>
+			<li><em>IDTR</em> - Interrupt Descriptor Table Register</li>
+		</ul>
+		<li>Operated by <em>lgdt, sgdt, lldt, sldt</em> instructions</li>
+	</ul>
+		<table>
+			<tr>
+				<td colspan=64>79</td>
+				<td colspan=16>15</td>
+			</tr>
+			<tr class="border">
+				<td colspan=64>Linear Base Address</td>
+				<td colspan=16>Table Limit</td>
+			</tr>
+		</table>
+</div>
+
+<div class="slide">
+	<h1>Segment Descriptor</h1>
+
 </div>
 
 </body>
