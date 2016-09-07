@@ -32,7 +32,7 @@
 </div> 
 
 <div class="slide">
-	<h1>Agenda></h1>
+	<h1>Agenda</h1>
 	<ul>
 		<li>Computer architectures in general</li>
 		<li>registers</li>
@@ -180,11 +180,11 @@ int a = 0x12345678;
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
-			<td>%&#x2588;h</td>
+			<td class="dark">%&#x2588;h</td>
 			<td>%&#x2588;l</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [abcd]</p>
+	<p>&#x2588; is one of [abcd]; The %&#x2588;h are deprecated</p>
 	<table>
 		<tr>
 			<td>64</td>
@@ -251,8 +251,35 @@ int a = 0x12345678;
 
 <div class="slide">
 	<h1>Stack and Instruction Registers</h1>
+	<table style="float: right; width: 30%;">
+		<tr>
+			<td>%rbp &#8594;</td>
+			<td class="border dark">0xdead</td>
+			<td>0x1000</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td class="border dark">0xbeef</td>
+			<td>0xff8</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td class="border dark">0x1000</td>
+			<td>0xff0</td>
+		</tr>
+		<tr>
+			<td>%rsp &#8594;</td>
+			<td class="border dark">0xfefe</td>
+			<td>0xfe8</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td class="border">&nbsp;</td>
+			<td>0xfe0</td>
+		</tr>
+	</table>
 	<ul>
-		<li><em>RSP</em> - Stack Pointer, points to the <em>top</em> of the stack</li>
+		<li><em>RSP</em> - Stack Pointer, points to the current <em>top</em> of the stack</li>
 		<ul>
 			<li>But stack grows <em>down</em>!</li>
 			<li>Operated by push/pop instructions</li>
@@ -260,6 +287,7 @@ int a = 0x12345678;
 		<li><em>RBP</em> - Base Pointer</li>
 		<ul>
 			<li>Base of this function's Stack Frame</li>
+			<li>Optional use of GPR</li>
 		</ul>
 		<li><em>RIP</em> - Instruction Pointer</li>
 		<ul>
@@ -268,6 +296,7 @@ int a = 0x12345678;
 			<li>Available for read-only (64-bit only)</li>
 		</ul>
 	</ul>
+	</div>
 </div>
 
 <div class="slide">
@@ -276,10 +305,12 @@ int a = 0x12345678;
 		<li>All instructions operate on <em>Virtual Memory</em></li>
 		<ul>
 			<li>VM is non-contiguous (depends on mapping) 64-bit linear address space</li>
+			<li>In Intel terminology called <em>Linear Address</em></li>
 		</ul>
 		<li>VM is mapped to <em>Physical Memory</em></li>
 		<ul>
 			<li>PM is non-contiguous too (PCI space, SMM, &hellip;</li>
+			<li>Called <em>Physical Address</em></li>
 		</ul>
 		<li>x86 supports two modes of VMM:</li>
 		<ul>
@@ -295,7 +326,8 @@ int a = 0x12345678;
 
 <div class="slide">
 	<h1>Memory Management (cont.)</h1>
-	<img class="fill" alt="x86 VMM" src="images/x86-vmm.png"/> 
+	<img height=70% alt="x86 VMM" src="images/x86-vmm.png"/> 
+	<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
 </div>
 
 <div class="slide">
@@ -351,8 +383,26 @@ int a = 0x12345678;
 
 <div class="slide">
 	<h1>Segment Descriptor</h1>
-
+	<ul>
+		<li>A single item describing chunk of memory</li>
+		<li>PMA = Base address + instruction offset</li>
+		<li>Defined by base address &amp; limit</li>
+		<li>Almost disabled in 64-bit mode</li>
+		<ul>
+			<li>%cs, %ds, %ss, %es base considered zero</li>
+			<li>No limit checking</li>
+			<li>But %fs and %gs are usable!</li>
+		</ul>
+	</ul>
+	<img height=30% alt="Segment Descriptor" src="images/segment_descriptor.png"/> 
+	<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-8</p>
 </div>
 
+<div class="slide">
+	<h1>Other registers</h1>
+	<ul>
+		<li>%rflags</li>
+	</ul>
+</div>
 </body>
 </html>
