@@ -35,9 +35,9 @@
 	<h1>Agenda</h1>
 	<ul>
 		<li>Computer architectures in general</li>
-		<li>registers</li>
+		<li>Registers</li>
 		<li>The x86 and x86_64 computer architectures, common instructions</li>
-		<li>implicit and explicit stack operations</li>
+		<li>Implicit and explicit stack operations</li>
 		<li>System V ABI on x86_64 architecture</li>
 	</ul>
 </div>
@@ -91,6 +91,29 @@
 </div>
 
 <div class="slide">
+<h1>Variable instruction size</h1>
+<pre>
+(gdb) disassemble /r pthread_create
+Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
+   55			push   %rbp
+   48 89 e5		mov    %rsp,%rbp
+   41 57		push   %r15
+   41 56		push   %r14
+   41 55		push   %r13
+   41 54		push   %r12
+   49 89 f4		mov    %rsi,%r12
+   53			push   %rbx
+   48 81 ec b8 00 00 00	sub    $0xb8,%rsp
+   48 85 f6		test   %rsi,%rsi
+   48 89 bd 50 ff ff ff	mov    %rdi,-0xb0(%rbp)
+   48 89 b5 48 ff ff ff	mov    %rsi,-0xb8(%rbp)
+   48 89 95 60 ff ff ff	mov    %rdx,-0xa0(%rbp)
+   48 89 8d 58 ff ff ff	mov    %rcx,-0xa8(%rbp)
+   c6 85 6f ff ff ff 00	movb   $0x0,-0x91(%rbp)
+</pre>
+</div>
+
+<div class="slide">
 	<h1>Little Endian</h1>
 	<ul>
 		<li>The way the CPU accesses <em>multi-byte</em> content.</li>
@@ -123,19 +146,19 @@ int a = 0x12345678;
 			<td>8</td>
 		</tr>
 		<tr class="border">
-			<td colspan=4>%e&#x2588;x</td>
+			<td colspan=4>%e&#x2731;x</td>
 		</tr>
 		<tr class="border">
 			<td colspan=2 class="dark" style="width=50%;"></td>
-			<td colspan=2>%&#x2588;x</td>
+			<td colspan=2>%&#x2731;x</td>
 		</tr>
 		<tr class="border">
 			<td colspan=2 class="dark" style="width=50%;"></td>
-			<td>%&#x2588;h</td>
-			<td>%&#x2588;l</td>
+			<td>%&#x2731;h</td>
+			<td>%&#x2731;l</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [abcd]</p>
+	<p>&#x2731; is one of [abcd]</p>
 	<table>
 		<tr>
 			<td>32</td>
@@ -144,14 +167,14 @@ int a = 0x12345678;
 			<td>8</td>
 		</tr>
 		<tr class="border">
-			<td colspan=4>%e&#x2588;</td>
+			<td colspan=4>%e&#x2731;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=2 class="dark" style="width=50%;"></td>
-			<td colspan=2>%&#x2588;</td>
+			<td colspan=2>%&#x2731;</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [di|si|bp|sp]</p>
+	<p>&#x2731; is one of [di|si|bp|sp]</p>
 </div>
 
 <div class="slide">
@@ -168,23 +191,23 @@ int a = 0x12345678;
 			<td>8</td>
 		</tr>
 		<tr class="border">
-			<td colspan=8>%r&#x2588;x</td>
+			<td colspan=8>%r&#x2731;x</td>
 		</tr>
 		<tr class="border">
 			<td colspan=4 class="dark" style="width=50%;"></td>
-			<td colspan=4>%e&#x2588;x</td>
+			<td colspan=4>%e&#x2731;x</td>
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
-			<td colspan=2>%&#x2588;x</td>
+			<td colspan=2>%&#x2731;x</td>
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
-			<td class="dark">%&#x2588;h</td>
-			<td>%&#x2588;l</td>
+			<td class="dark">%&#x2731;h</td>
+			<td>%&#x2731;l</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [abcd]; The %&#x2588;h are deprecated</p>
+	<p>&#x2731; is one of [abcd]; The %&#x2731;h are deprecated</p>
 	<table>
 		<tr>
 			<td>64</td>
@@ -197,22 +220,22 @@ int a = 0x12345678;
 			<td>8</td>
 		</tr>
 		<tr class="border">
-			<td colspan=8>%r&#x2588;</td>
+			<td colspan=8>%r&#x2731;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=4 class="dark" style="width=50%;"></td>
-			<td colspan=4>%e&#x2588;</td>
+			<td colspan=4>%e&#x2731;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
-			<td colspan=2>%&#x2588;</td>
+			<td colspan=2>%&#x2731;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=7 class="dark" style="width=50%;"></td>
-			<td>%&#x2588;l</td>
+			<td>%&#x2731;l</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [di|si|bp|sp]</p>
+	<p>&#x2731; is one of [di|si|bp|sp]</p>
 	<p>Also, %rip / %eip / %ip pointing to the <em>next</em> instruction to
 	execute is available for reading</p>
 </div>
@@ -231,22 +254,22 @@ int a = 0x12345678;
 			<td>8</td>
 		</tr>
 		<tr class="border">
-			<td colspan=8>%r&#x2588;</td>
+			<td colspan=8>%r&#x2731;</td>
 		</tr>
 		<tr class="border">
 			<td colspan=4 class="dark" style="width=50%;"></td>
-			<td colspan=4>%r&#x2588;d</td>
+			<td colspan=4>%r&#x2731;d</td>
 		</tr>
 		<tr class="border">
 			<td colspan=6 class="dark" style="width=50%;"></td>
-			<td colspan=2>%r&#x2588;w</td>
+			<td colspan=2>%r&#x2731;w</td>
 		</tr>
 		<tr class="border">
 			<td colspan=7 class="dark" style="width=50%;"></td>
-			<td>r%&#x2588;b</td>
+			<td>r%&#x2731;b</td>
 		</tr>
 	</table>
-	<p>&#x2588; is one of [8|9|10|11|12|13|14|15]</p>
+	<p>&#x2731; is one of [8|9|10|11|12|13|14|15]</p>
 </div>
 
 <div class="slide">
@@ -399,10 +422,47 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-	<h1>Other registers</h1>
+	<h1>Flags and features register</h1>
 	<ul>
-		<li>%rflags</li>
+		<li>64-bit %rflags</li>
+		<ul>
+			<li><em>CF</em> - Cary flag</li>
+			<li><em>ZF</em> - Zero flag</li>
+			<li><em>SF</em> - Sign flag</li>
+			<li><em>IF</em> - Interrupts enabled flag</li>
+		</ul>
+		<li>Extended Feature Enable Register (EFER)</li>
+		<ul>
+			<li>Long Mode Enable (LME)</li>
+			<li>Long Mode Active (LMA)</li>
+		</ul>
 	</ul>
 </div>
+
+<div class="slide">
+	<h1>Control Registers</h1>
+	<ul>
+		<li>%cr0</li>
+		<ul>
+			<li><em>PE</em> - Protected Mode enabled</li>
+			<li><em>TS</em> - Task Switched, used for FPU</li>
+			<li><em>PG</em> - Enable Paging (MMU)</li>
+		</ul>
+		<li>%cr1 - reserved</li>
+		<li>%cr2 - Page Fault Linear Address</li>
+		<li>%cr3 - Page Tables root</li>
+		<li>%cr4</li>
+		<ul>
+			<li>Physical Address Extension (PAE)</li>
+			<li>Machine Check Exception (MCE)</li>
+			<li>Virtual Machine Extensions Enable (VMXE)</li>
+		</ul>
+		<li>%cr8 - TPR, interrupt priority mask (4 bits)</li>
+	</ul>
+</div>
+
+<div class="slide">
+</div>
+
 </body>
 </html>
