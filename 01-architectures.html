@@ -1,35 +1,37 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
-<head> 
-  <title>Binary Code Analysis - Agenda</title> 
-  <meta name="copyright" 
-   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" /> 
-  <link rel="stylesheet" type="text/css" media="screen, projection, print" 
-   href="styles/slidy.css" /> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Agenda</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
    href="styles/w3c-blue.css" />
   <script src="scripts/slidy.js" charset="utf-8"
-   type="text/javascript"></script> 
+   type="text/javascript"></script>
   <link rel="stylesheet" type="text/css" href="styles/cda.css" />
 </head>
 
 <body>
 
-<div class="background"> 
-  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" /> 
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
   <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
 </div>
- 
-<div class="slide cover"> 
- <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" /> 
- <br clear="all" />            
- <h1>Binary Code Analysis</h1> 
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
  <h2>Computer Architectures</h2>
  <p>Stanislav Kozina<br>
  Associate Manager, Software Engineering, Red Hat<br>
- &copy; January 2016</p> 
-</div> 
+ &copy; January 2016</p>
+ </div>
+</div>
 
 <div class="slide">
 	<h1>Agenda</h1>
@@ -55,7 +57,7 @@
 
 <div class="slide">
 	<h1>History</h1>
-	<img class="right" alt="Seattle Computer" src="images/Seattle_Computer_8086-2.jpg"/> 
+	<img class="right" alt="Seattle Computer" src="images/Seattle_Computer_8086-2.jpg"/>
 	<ul>
 		<li>1978: Intel 8086, 16bit, 20bit addressing, only real mode</li>
 		<li>1982: Intel 80286, 16bit, 24bit addressing, Protected
@@ -273,195 +275,370 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-	<h1>Stack and Instruction Registers</h1>
-	<table style="float: right; width: 30%;">
-		<tr>
-			<td>%rbp &#8594;</td>
-			<td class="border dark">0xdead</td>
-			<td>0x1000</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td class="border dark">0xbeef</td>
-			<td>0xff8</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td class="border dark">0x1000</td>
-			<td>0xff0</td>
-		</tr>
-		<tr>
-			<td>%rsp &#8594;</td>
-			<td class="border dark">0xfefe</td>
-			<td>0xfe8</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td class="border">&nbsp;</td>
-			<td>0xfe0</td>
-		</tr>
-	</table>
+<h1>Stack and Instruction Registers</h1>
+<table style="float: right; width: 30%;">
+	<tr>
+		<td>%rbp &#8594;</td>
+		<td class="border dark">0xdead</td>
+		<td>0x1000</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td class="border dark">0xbeef</td>
+		<td>0xff8</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td class="border dark">0x1000</td>
+		<td>0xff0</td>
+	</tr>
+	<tr>
+		<td>%rsp &#8594;</td>
+		<td class="border dark">0xfefe</td>
+		<td>0xfe8</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td class="border">&nbsp;</td>
+		<td>0xfe0</td>
+	</tr>
+</table>
+<ul>
+	<li><em>RSP</em> - Stack Pointer, points to the current <em>top</em> of the stack</li>
 	<ul>
-		<li><em>RSP</em> - Stack Pointer, points to the current <em>top</em> of the stack</li>
-		<ul>
-			<li>But stack grows <em>down</em>!</li>
-			<li>Operated by push/pop instructions</li>
-		</ul>
-		<li><em>RBP</em> - Base Pointer</li>
-		<ul>
-			<li>Base of this function's Stack Frame</li>
-			<li>Optional use of GPR</li>
-		</ul>
-		<li><em>RIP</em> - Instruction Pointer</li>
-		<ul>
-			<li>Points to the byte <em>after</em> currently executed instruction</li>
-			<li>Operated by call, jmp instructions</li>
-			<li>Available for read-only (64-bit only)</li>
-		</ul>
+		<li>But stack grows <em>down</em>!</li>
+		<li>Operated by push/pop instructions</li>
 	</ul>
-	</div>
+	<li><em>RBP</em> - Base Pointer</li>
+	<ul>
+		<li>Base of this function's Stack Frame</li>
+		<li>Optional use of GPR</li>
+	</ul>
+	<li><em>RIP</em> - Instruction Pointer</li>
+	<ul>
+		<li>Points to the byte <em>after</em> currently executed instruction</li>
+		<li>Operated by call, jmp instructions</li>
+		<li>Available for read-only (64-bit only)</li>
+	</ul>
+</ul>
+</div>
 </div>
 
 <div class="slide">
-	<h1>Memory Management</h1>
+<h1>Memory Management</h1>
+<ul>
+	<li>All instructions operate on <em>Virtual Memory</em></li>
 	<ul>
-		<li>All instructions operate on <em>Virtual Memory</em></li>
+		<li>VM is non-contiguous (depends on mapping) 64-bit linear address space</li>
+		<li>In Intel terminology called <em>Linear Address</em></li>
+	</ul>
+	<li>VM is mapped to <em>Physical Memory</em></li>
+	<ul>
+		<li>PM is non-contiguous too (PCI space, SMM, &hellip;</li>
+		<li>Called <em>Physical Address</em></li>
+	</ul>
+	<li>x86 supports two modes of VMM:</li>
+	<ul>
+		<li><em>Segmentation</em> - whole PM split between </em>segments</em></li>
+		<li><em>Paging</em> - Each Virtual Page is mapped to given Physical Page</li>
+		<li>Segmentation can't be turned off!</li>
 		<ul>
-			<li>VM is non-contiguous (depends on mapping) 64-bit linear address space</li>
-			<li>In Intel terminology called <em>Linear Address</em></li>
-		</ul>
-		<li>VM is mapped to <em>Physical Memory</em></li>
-		<ul>
-			<li>PM is non-contiguous too (PCI space, SMM, &hellip;</li>
-			<li>Called <em>Physical Address</em></li>
-		</ul>
-		<li>x86 supports two modes of VMM:</li>
-		<ul>
-			<li><em>Segmentation</em> - whole PM split between </em>segments</em></li>
-			<li><em>Paging</em> - Each Virtual Page is mapped to given Physical Page</li>
-			<li>Neither of it can be turned off!</li>
-			<ul>
-			<li>&hellip; but can be made transparent</li>
-			</ul>
+		<li>&hellip; but can be made transparent</li>
 		</ul>
 	</ul>
+</ul>
 </div>
 
 <div class="slide">
-	<h1>Memory Management (cont.)</h1>
-	<img height=70% alt="x86 VMM" src="images/x86-vmm.png"/> 
-	<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
+<h1>Memory Management (cont.)</h1>
+<img height=70% alt="x86 VMM" src="images/x86-vmm.png"/>
+<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
 </div>
 
 <div class="slide">
-	<h1>Segment Registers</h1>
+<h1>Segment Registers</h1>
+<ul>
+	<li>Six 16-bit segment selector registers available:</li>
 	<ul>
-		<li>Six 16-bit segment selector registers available:</li>
-		<ul>
-			<li><em>cs</em> - Code Segment</li>
-			<li><em>ss</em> - Stack Segment</li>
-			<li><em>ds</em> - Data Segment</li>
-			<li><em>es, fs, gs</em> - Additional Data Segments</li>
-		</ul>
+		<li><em>cs</em> - Code Segment</li>
+		<li><em>ss</em> - Stack Segment</li>
+		<li><em>ds</em> - Data Segment</li>
+		<li><em>es, fs, gs</em> - Additional Data Segments</li>
 	</ul>
+</ul>
+<table>
+	<tr>
+		<td colspan=14>15</td>
+		<td>2</td>
+		<td colspan=2>1</td>
+	</tr>
+	<tr class="border">
+		<td colspan=14>Index</td>
+		<td>TI</td>
+		<td colspan=2>RPL</td>
+	</tr>
+</table>
+<p><em>Index</em> - Offset / 8 into the Segment Descriptor Table</p>
+<p><em>TI</em> - Table Indicator: 0 GDT, 1 LDT</p>
+<p><em>RPL</em> - Requested Privilege Level</p>
+</div>
+
+<div class="slide">
+<h1>Base Address Registers</h1>
+<ul>
+	<li>80-bit width pointers to the base of the table:</li>
+	<ul>
+		<li><em>GDTR</em> - Global Descriptor Table Register</li>
+		<li><em>LDTR</em> - Local Descriptor Table Register (obsolete)</li>
+		<li><em>IDTR</em> - Interrupt Descriptor Table Register</li>
+	</ul>
+	<li>Operated by <em>lgdt, sgdt, lldt, sldt</em> instructions</li>
+</ul>
 	<table>
 		<tr>
-			<td colspan=14>15</td>
-			<td>2</td>
-			<td colspan=2>1</td>
+			<td colspan=64>79</td>
+			<td colspan=16>15</td>
 		</tr>
 		<tr class="border">
-			<td colspan=14>Index</td>
-			<td>TI</td>
-			<td colspan=2>RPL</td>
+			<td colspan=64>Linear Base Address</td>
+			<td colspan=16>Table Limit</td>
 		</tr>
 	</table>
-	<p><em>Index</em> - Offset / 8 into the Segment Descriptor Table</p>
-	<p><em>TI</em> - Table Indicator: 0 GDT, 1 LDT</p>
-	<p><em>RPL</em> - Requested Privilege Level</p>
 </div>
 
 <div class="slide">
-	<h1>Base Address Registers</h1>
+<h1>Segment Descriptor</h1>
+<ul>
+	<li>A single item describing chunk of memory</li>
+	<li>PMA = Base address + instruction offset</li>
+	<li>Defined by base address &amp; limit</li>
+	<li>Almost disabled in 64-bit mode</li>
 	<ul>
-		<li>80-bit width pointers to the base of the table:</li>
-		<ul>
-			<li><em>GDTR</em> - Global Descriptor Table Register</li>
-			<li><em>LDTR</em> - Local Descriptor Table Register (obsolete)</li>
-			<li><em>IDTR</em> - Interrupt Descriptor Table Register</li>
-		</ul>
-		<li>Operated by <em>lgdt, sgdt, lldt, sldt</em> instructions</li>
+		<li>%cs, %ds, %ss, %es base considered zero</li>
+		<li>No limit checking</li>
+		<li>But %fs and %gs are usable!</li>
 	</ul>
-		<table>
-			<tr>
-				<td colspan=64>79</td>
-				<td colspan=16>15</td>
-			</tr>
-			<tr class="border">
-				<td colspan=64>Linear Base Address</td>
-				<td colspan=16>Table Limit</td>
-			</tr>
-		</table>
+</ul>
+<img height=30% alt="Segment Descriptor" src="images/segment_descriptor.png"/>
+<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-8</p>
 </div>
 
 <div class="slide">
-	<h1>Segment Descriptor</h1>
+<h1>Flags and features register</h1>
+<ul>
+	<li>64-bit %rflags</li>
 	<ul>
-		<li>A single item describing chunk of memory</li>
-		<li>PMA = Base address + instruction offset</li>
-		<li>Defined by base address &amp; limit</li>
-		<li>Almost disabled in 64-bit mode</li>
-		<ul>
-			<li>%cs, %ds, %ss, %es base considered zero</li>
-			<li>No limit checking</li>
-			<li>But %fs and %gs are usable!</li>
-		</ul>
+		<li><em>CF</em> - Cary flag</li>
+		<li><em>ZF</em> - Zero flag</li>
+		<li><em>SF</em> - Sign flag</li>
+		<li><em>IF</em> - Interrupts enabled flag</li>
 	</ul>
-	<img height=30% alt="Segment Descriptor" src="images/segment_descriptor.png"/> 
-	<p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-8</p>
-</div>
-
-<div class="slide">
-	<h1>Flags and features register</h1>
+	<li>Extended Feature Enable Register (EFER)</li>
 	<ul>
-		<li>64-bit %rflags</li>
-		<ul>
-			<li><em>CF</em> - Cary flag</li>
-			<li><em>ZF</em> - Zero flag</li>
-			<li><em>SF</em> - Sign flag</li>
-			<li><em>IF</em> - Interrupts enabled flag</li>
-		</ul>
-		<li>Extended Feature Enable Register (EFER)</li>
-		<ul>
-			<li>Long Mode Enable (LME)</li>
-			<li>Long Mode Active (LMA)</li>
-		</ul>
+		<li>Long Mode Enable (LME)</li>
+		<li>Long Mode Active (LMA)</li>
 	</ul>
+</ul>
 </div>
 
 <div class="slide">
-	<h1>Control Registers</h1>
+<h1>Control Registers</h1>
+<ul>
+	<li>%cr0</li>
 	<ul>
-		<li>%cr0</li>
-		<ul>
-			<li><em>PE</em> - Protected Mode enabled</li>
-			<li><em>TS</em> - Task Switched, used for FPU</li>
-			<li><em>PG</em> - Enable Paging (MMU)</li>
-		</ul>
-		<li>%cr1 - reserved</li>
-		<li>%cr2 - Page Fault Linear Address</li>
-		<li>%cr3 - Page Tables root</li>
-		<li>%cr4</li>
-		<ul>
-			<li>Physical Address Extension (PAE)</li>
-			<li>Machine Check Exception (MCE)</li>
-			<li>Virtual Machine Extensions Enable (VMXE)</li>
-		</ul>
-		<li>%cr8 - TPR, interrupt priority mask (4 bits)</li>
+		<li><em>PE</em> - Protected Mode enabled</li>
+		<li><em>TS</em> - Task Switched, used for FPU</li>
+		<li><em>PG</em> - Enable Paging (MMU)</li>
 	</ul>
+	<li>%cr1 - reserved</li>
+	<li>%cr2 - Page Fault Linear Address</li>
+	<li>%cr3 - Page Tables root</li>
+	<li>%cr4</li>
+	<ul>
+		<li>Physical Address Extension (PAE)</li>
+		<li>Machine Check Exception (MCE)</li>
+		<li>Virtual Machine Extensions Enable (VMXE)</li>
+	</ul>
+	<li>%cr8 - TPR, interrupt priority mask (4 bits)</li>
+</ul>
+</div>
+
+<div class="slide cover">
+<br clear="all" />
+<h1>x86 Assembly Language</h1>
 </div>
 
 <div class="slide">
+<h1>Addressing modes</h1>
+<ul>
+	<li>x86 allows indirect addressing with offset, index and scale</li>
+	<li>VMA = offset(%reg, %index, scale)</li>
+	<li>VMA = offset + %reg + %index*scale</li>
+	<ul>
+		<li></em>%reg</em> is any GPR</li>
+		<li><em>scale</em> is any from [1248]</li>
+		<li><em>%index</em> is any GPR</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Addressing modes - Example</h1>
+<p>VMA = offset(%reg, %index, scale)</p>
+<pre>
+struct foo {
+	int a;
+	int b;
+};
+
+void bar(struct foo *a) {
+	volatile int index = 3;
+	printf("b: %d\n", a[index].b);
+}
+</pre>
+<pre>
+movl   $0x3,0xc(%rsp)
+movslq 0xc(%rsp),%rax
+mov    0x4(%rdi,%rax,8),%esi
+</pre>
+</div>
+
+<div class="slide">
+<h1>Assembly syntax</h1>
+<ul>
+	<li>Intel syntax vs. AT&amp;T syntax</li>
+	<li>We'll use that later because that's what *NIX tools do</li>
+</ul>
+<table>
+	<tr class="border">
+	<th>Intel</th>
+	<th>AT&amp;T</th>
+	</tr>
+	<tr>
+		<td>
+<pre>
+movw $0x3, %rax
+movq 0x8(%rax, %rcx, 2), %rsi
+addl $0x1000, %esi
+</pre>
+		</td>
+		<td>
+<pre>
+MOV AX, 0x3
+MOV RSI, [ RAX + 2*RCX + 8 ]
+ADD ESI, 0x1000
+</pre>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>Basic load/store instructions</h1>
+<ul>
+	<li><em>mov</em> - Move data between registers and/or memory</li>
+	<li><em>nop</em> - Do nothing, 1 byte, actually xchg %eax, %eax</li>
+	<li><em>lea</em> - Load Effective Address, calculates address of memory operand</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Basic arithmetics instructions</h1>
+<ul>
+	<li><em>add, sub</em> - Basic increment, decrement, sets flags register</li>
+	<li><em>and, or, xor</em> - Bit operations, sets flags register</li>
+	<li><em>inc, dec</em> - Increment, decrement by one</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Conditionals</h1>
+<ul>
+	<li><em>cmp</em> - Subtract two operands, discrard result, set flags register</li>
+	<li><em>test</em> - And two operands, discrad result, set flags register</li>
+	<li><em>jmp</em> - Unconditional jump</li>
+	<li><em>je, jnz, &hellip;</em> - Jump based on flags register</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Conditionals - Example</h1>
+<pre>
+testb  $0x8,0x8(%r12)
+jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
+</pre>
+</div>
+
+<div class="slide">
+<h1>Stack instructions</h1>
+<ul>
+	<li><em>push</em> - Decrement the %rsp <em>and</em> store the value</li>
+	<li><em>pop</em> - Load the value <em>and</em> increment the %rsp</li>
+	<li><em>call</em> - push %rip <em>and</em> set %rip to value</li>
+	<li><em>ret</em> - pop %rip</li>
+</ul>
+</div>
+
+<div class="slide cover">
+ <br clear="all" />
+ <h1>x86_86 System V ABI</h1>
+</div>
+
+<div class="slide">
+<h1>ABI</h1>
+<ul>
+	<li>Document which defines the actual interface on given architecture</li>
+	<li>Function calling convention</li>
+	<li>Implicit stack usage</li>
+	<li>Usage of register inside a function</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>x86_86 System V ABI</h1>
+<ul>
+	<li>Mostly padded to 4-byte alignment</li>
+	<li>First 6 arguments passed via <em>%rdi, %rsi, %rdx, %rcx, %r8, %r9</em>.</li>
+	<li>The rest passed through the stack.</li>
+	<li>Return value passed through <em>%rax</em>.</li>
+	<li>Use push/pop for stack operations, use %rbp as base pointer.</li>
+	<li>Scratch (volatile) registers: <em>%rax, %rcx, %rdx, %rdi, %rsi, %r8, %r9, %r10, %r11</em></li>
+	<li>Preserved (non-volatile) registers: <em>%rbx, %rbp, %rsp, %r12, %r13, %r14, %r15</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Function prolog</h1>
+<pre>
+Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
+   0x00007f3efa731880 <+0>:	push   %rbp
+   0x00007f3efa731881 <+1>:	mov    %rsp,%rbp
+   0x00007f3efa731884 <+4>:	push   %r15
+   0x00007f3efa731886 <+6>:	push   %r14
+   0x00007f3efa731888 <+8>:	push   %r13
+   0x00007f3efa73188a <+10>:	push   %r12
+   0x00007f3efa73188c <+12>:	mov    %rsi,%r12
+   0x00007f3efa73188f <+15>:	push   %rbx
+</pre>
+</div>
+
+<div class="slide">
+<h1>Function epilog</h1>
+<pre>
+   0x00007f3efa731d89 <+1289>:	lea    -0x28(%rbp),%rsp
+   0x00007f3efa731d8d <+1293>:	mov    %r8d,%eax
+   0x00007f3efa731d90 <+1296>:	pop    %rbx
+   0x00007f3efa731d91 <+1297>:	pop    %r12
+   0x00007f3efa731d93 <+1299>:	pop    %r13
+   0x00007f3efa731d95 <+1301>:	pop    %r14
+   0x00007f3efa731d97 <+1303>:	pop    %r15
+   0x00007f3efa731d99 <+1305>:	pop    %rbp
+   0x00007f3efa731d9a <+1306>:	retq
+</pre>
+</div>
+
+<div class="slide">
+<h1>Detailed stack animation</h1>
 </div>
 
 </body>

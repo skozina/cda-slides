@@ -19,10 +19,13 @@ div.slide.cover {
   background: #a30000 url("../images/background.png");
   background-size: 100% 100%;
   background-repeat: no-repeat;
+  display: flex;
+  /* flex-direction: column;*/
+  align-items: center;
+  /* justify-content: center;*/
 }
 
 div.slide.cover img.cover {
-   padding-top: 5em;
    float: left;
    width: 10em;
 }
@@ -50,6 +53,10 @@ table {
 
 table tr.border td {
 	border:0.1em solid black;
+}
+
+table tr.border th {
+	text-align: left;
 }
 
 table tr td.border {
