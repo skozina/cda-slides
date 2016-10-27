@@ -50,7 +50,7 @@
 		<li>Computer architectures in general</li>
 		<li>registers</li>
 		<li><span class="red">The x86 and x86_64 computer architectures</span>, common instructions</li>
-		<li>implicit and explicit stack operations</li>
+		<li>Implicit and explicit stack operations</li>
 		<li>System V ABI on x86_64 architecture</span></li>
 	</ul>
 </div>
@@ -608,6 +608,36 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 </div>
 
 <div class="slide">
+<h1>Structure padding</h1>
+<pre>
+struct foo {
+	char a;
+	int b;
+};
+
+printf("sizeof (struct foo): %d\n", sizeof (struct foo));
+printf("offsetof(struct foo, b): %d\n", &((struct foo *)0)->b);
+</pre>
+</div>
+
+<div class="slide">
+<h1>Structure padding</h1>
+<pre>
+struct foo {
+	char a;
+	int b;
+};
+
+printf("sizeof (struct foo): %d\n", sizeof (struct foo));
+printf("offsetof(struct foo, b): %d\n", &((struct foo *)0)->b);
+</pre>
+<pre>
+sizeof (struct foo): 8
+offsetof(struct foo, b): 4
+</pre>
+</div>
+
+<div class="slide">
 <h1>Function prolog</h1>
 <pre>
 Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
@@ -638,7 +668,290 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Detailed stack animation</h1>
+<h1>Red zone</h1>
+<ul>
+<li>A reserved area below (out) the top of the stack</li>
+<li>All other stacks (exception, trap) have to skip this area</li>
+<li>Allowed for performance optimization</li>
+<li>gcc -mno-red-zone</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Stack operation</h1>
+<ul>
+	<li><em>Stack pointer (%rsp)</em> points to the last item on the stack</li>
+	<li><em>Frame pointer (%rbp)</em> optionally points to the base of the stack frame.</li>
+	<li><em>Stack frame</em> is the part of the stack used by the current function.<li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	<span class="red">callq  0x4004d6 &lt;bar&gt;</span> &larr; %rip
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe &larr; %rsp &larr; %rbp
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	<span class="red">push   %rbp</span> &larr; %rip
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe &larr; %rbp
+0x1f8: 0x004004fd &larr; %rsp
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	<span class="red">mov    %rsp,%rbp</span> &larr; %rip
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe &larr; %rbp
+0x1f8: 0x004004fd
+0x1f0: 0x00000200 &larr; %rsp
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	<span class="red">mov    %edi,-0x4(%rbp)</span> &larr; %rip
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe
+0x1f8: 0x004004fd
+0x1f0: 0x00000200 &larr; %rsp &larr; %rbp
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	<span class="red">mov    %esi,-0x8(%rbp)</span> &larr; %rip
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe
+0x1f8: 0x004004fd
+0x1f0: 0x00000200 &larr; %rsp &larr; %rbp
+0x1ec: 0x3 <span class="red">RED ZONE!</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	<span class="red">pop    %rbp</span> &larr; %rip
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe
+0x1f8: 0x004004fd
+0x1f0: 0x00000200 &larr; %rsp &larr; %rbp
+0x1ec: 0x3 <span class="red">RED ZONE!</span>
+0x1e8: 0x4 <span class="red">RED ZONE!</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	nop
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	<span class="red">retq</span> &larr; %rip
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe &larr; %rbp
+0x1f8: 0x004004fd &larr; %rsp
+0x1f0: 0x00000200
+0x1ec: 0x3
+0x1e8: 0x4
+</pre>
+</div>
+</div>
+</div>
+
+<div class="slide">
+<h1>Stack operation animation</h1>
+<div class="table">
+<div>
+<pre>
+foo:
+...
+   0x004004ee:	mov    $0x4,%esi
+   0x004004f3:	mov    $0x3,%edi
+   0x004004f8:	callq  0x4004d6 &lt;bar&gt;
+   0x004004fd:	<span class="red">nop</span> &larr; %rip
+bar:
+   0x004004d6:	push   %rbp
+   0x004004d7:	mov    %rsp,%rbp
+   0x004004da:	mov    %edi,-0x4(%rbp)
+   0x004004dd:	mov    %esi,-0x8(%rbp)
+   0x004004e0:	mov    -0x4(%rbp),%edx
+   0x004004e3:	mov    -0x8(%rbp),%eax
+   0x004004e6:	add    %edx,%eax
+   0x004004e8:	pop    %rbp
+   0x004004e9:	retq
+</pre>
+</div>
+<div class="fill">
+<pre>
+0x200: 0xdeadbabe &larr; %rbp &larr; %rsp
+0x1f8: 0x004004fd
+0x1f0: 0x00000200
+0x1ec: 0x3
+0x1e8: 0x4
+</pre>
+</div>
+</div>
 </div>
 
 </body>

@@ -83,6 +83,14 @@ p.grey {
 	color: red;
 }
 
+div.table {
+	display: flex;
+}
+
+div.table.fill {
+	flex-item: 1;
+}
+
 div.toolbar {
   color: #4c4c4c;
   background-color: #dcdcdc;
