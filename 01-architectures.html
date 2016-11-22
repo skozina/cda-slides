@@ -954,5 +954,30 @@ bar:
 </div>
 </div>
 
+<div class="slide cover">
+ <br clear="all" />
+ <h1>Other architectures</h1>
+</div>
+
+<div class="slide">
+<h1>Branch delay slot</h1>
+<ul>
+	<li>One instruction after the current one is <em>always</em> executed</li>
+	<li>Even if the preceeding instruction has jumped elsewhere</li>
+	<li>This is because the next instruction is already in the CPU pipeline</li>
+	<li>This behavior can be seen on MIPS and SPARC CPUs.</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>TLB miss</h1>
+<ul>
+	<li><em>TLB</em> - Translation Lookaside Buffer</li>
+	<li>A small associative cache used for fast VMA-&gt;PMA translation</li>
+	<li>Skylake has ~4KB ITLB, ~4KB DTLB</li>
+	<li>Other architectures don't maintain TLB automatically - <em>TLB miss</em> trap.</li>
+</ul>
+</div>
+
 </body>
 </html>

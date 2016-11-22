@@ -1,0 +1,419 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Agenda</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>Compilation, linking and running code</h2>
+ <p>Stanislav Kozina<br>
+ Associate Manager, Software Engineering, Red Hat<br>
+ &copy; January 2016</p>
+ </div>
+</div>
+
+<div class="slide">
+<h1>Agenda</h1>
+<ul>
+	<li>Compilation, linking, and running code.</li>
+	<li>Examples of compiler optimizations</li>
+	<li>Stack optimizations (leaf and tail calls, function inlining)</li>
+	<li>Linker script</li>
+	<li>Understanding of the Unix binary file (ELF, objdump)</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Compilation</h1>
+<ul>
+	<li>Translation of the source code into its binary form</li>
+</ul>
+<pre>
+int main(int argc, char **argv) {
+	printf("Hello world\n");
+	return (0);
+}</pre>
+
+<pre>
+$ gcc -O0 -Wall -c -o test.o test.c
+$ gdb test.o
+(gdb) disassemble main
+Dump of assembler code for function main:
+   0x0000000000000000 &lt;+0&gt;:	push   %rbp
+   0x0000000000000001 &lt;+1&gt;:	mov    %rsp,%rbp
+   0x0000000000000004 &lt;+4&gt;:	sub    $0x10,%rsp
+   0x0000000000000008 &lt;+8&gt;:	mov    %edi,-0x4(%rbp)
+   0x000000000000000b &lt;+11&gt;:	mov    %rsi,-0x10(%rbp)
+   0x000000000000000f &lt;+15&gt;:	mov    $0x0,%edi
+   0x0000000000000014 &lt;+20&gt;:	callq  0x19 &lt;main+25&gt;
+   0x0000000000000019 &lt;+25&gt;:	mov    $0x0,%eax
+   0x000000000000001e &lt;+30&gt;:	leaveq 
+   0x000000000000001f &lt;+31&gt;:	retq
+</pre>
+
+<pre>
+$ stat test.o
+  File: 'test.o'
+  Size: 1512      	Blocks: 8          IO Block: 4096   regular file
+</pre>
+</div>
+
+<div class="slide">
+<h1>Compilation</h1>
+<ul>
+	<li>Translation of the source code into its binary form</li>
+</ul>
+<pre>
+int main(int argc, char **argv) {
+	printf("Hello world\n");
+	return (0);
+}</pre>
+
+<pre>
+$ gcc -O0 -Wall -c -o test.o test.c
+$ gdb test.o
+(gdb) disassemble main
+Dump of assembler code for function main:
+   0x0000000000000000 &lt;+0&gt;:	push   %rbp
+   0x0000000000000001 &lt;+1&gt;:	mov    %rsp,%rbp
+   0x0000000000000004 &lt;+4&gt;:	sub    $0x10,%rsp
+   0x0000000000000008 &lt;+8&gt;:	mov    %edi,-0x4(%rbp)
+   0x000000000000000b &lt;+11&gt;:	mov    %rsi,-0x10(%rbp)
+   0x000000000000000f &lt;+15&gt;:	<span class="red">mov    $0x0,%edi</span>
+   0x0000000000000014 &lt;+20&gt;:	<span class="red">callq  0x19 &lt;main+25&gt;</span>
+   0x0000000000000019 &lt;+25&gt;:	mov    $0x0,%eax
+   0x000000000000001e &lt;+30&gt;:	leaveq 
+   0x000000000000001f &lt;+31&gt;:	retq
+</pre>
+
+<pre>
+$ stat test.o
+  File: 'test.o'
+  <span class="red">Size: 1512</span>      	Blocks: 8          IO Block: 4096   regular file
+</pre>
+</div>
+
+<div class="slide">
+<h1>ELF file format</h1>
+<ul>
+	<li>Executable and Linkable format</li>
+	<li>Designed for access through memory mapping</li>
+	<li>Allows for two views of the binary data:</li>
+	<ul>
+		<li><em>Sections</em> of the binary file</li>
+		<li><em>Segments</em> of the process entity</li>
+	</ul>
+	<li>Consists of:</li>
+	<ul>
+		<li><em>File Header</em>, which identifies the ELF binary</li>
+		<li><em>Section Header</em>, which defines sections</li>
+		<li><em>Progmra Header</em>, which defines program segments</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+	<h1>ELF File Header</h1>
+<pre>
+$ readelf -h test.o
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          560 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           64 (bytes)
+  Number of section headers:         11
+  Section header string table index: 8
+</pre>
+</div>
+
+<div class="slide">
+<h1>ELF Section Header</h1>
+<pre>
+$ readelf -S test.o
+There are 11 section headers, starting at offset 0x230:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .text             PROGBITS         0000000000000000  00000040
+       0000000000000020  0000000000000000  AX       0     0     1
+  [ 2] .rela.text        RELA             0000000000000000  000001a8
+       0000000000000030  0000000000000018   I       9     1     8
+  [ 3] .data             PROGBITS         0000000000000000  00000060
+       0000000000000000  0000000000000000  WA       0     0     1
+  [ 4] .bss              NOBITS           0000000000000000  00000060
+       0000000000000000  0000000000000000  WA       0     0     1
+  [ 5] .rodata           PROGBITS         0000000000000000  00000060
+       000000000000000c  0000000000000000   A       0     0     1
+  [ 6] .comment          PROGBITS         0000000000000000  0000006c
+       000000000000002d  0000000000000001  MS       0     0     1
+  [ 7] .note.GNU-stack   PROGBITS         0000000000000000  00000099
+       0000000000000000  0000000000000000           0     0     1
+  [ 8] .shstrtab         STRTAB           0000000000000000  000001d8
+       0000000000000052  0000000000000000           0     0     1
+  [ 9] .symtab           SYMTAB           0000000000000000  000000a0
+       00000000000000f0  0000000000000018          10     8     8
+  [10] .strtab           STRTAB           0000000000000000  00000190
+       0000000000000012  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+</pre>
+</div>
+
+<div class="slide">
+<h1>ELF Section Header</h1>
+	<ul>
+		<li><em>.text</em> - Program code</li>
+		<li><em>.data</em> - Global initiatlized variables</li>
+		<li><em>.rodata</em> - String and other constants</li>
+		<li><em>.bss</em> - Global uninitialized data</li>
+		<li><em>.shstrtab</em> - Section names</li>
+		<li><em>.symtab</em> - Symbol table, see nm(1)</li>
+		<li><em>.strtab</em> - Symbol names linked from .symtab</li>
+		<li><em>.rela.text</em> - Relocations in .text</li>
+		<li><em>.eh_frame</em> - Exception header frame, stack unwilding</li>
+	</ul>
+</div>
+
+<div class="slide">
+<h1>ELF Relocations</h1>
+<pre>
+$ readelf -r test.o
+
+Relocation section '.rela.text' at offset 0x1a8 contains 2 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+  000000000010  00050000000a R_X86_64_32       0000000000000000 .rodata + 0
+  000000000015  000900000002 R_X86_64_PC32     0000000000000000 puts - 4
+</pre>
+</div>
+
+<div class="slide">
+<h1>Symbol table</h1>
+<pre>
+$ readelf -s test.o
+
+Symbol table '.symtab' contains 10 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND 
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS test.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1 
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3 
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4 
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5 
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7 
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    6 
+     8: 0000000000000000    32 FUNC    GLOBAL DEFAULT    1 main
+     9: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND puts
+</pre>
+
+<pre>
+$ nm test.o
+0000000000000000 T main
+                 U puts
+</pre>
+</div>
+
+<div class="slide">
+<h1>.rodata section</h1>
+<ul>
+	<li>Contains all constants of the binary</li>
+</ul>
+<pre>
+$ readelf -x .rodata test.o
+
+Hex dump of section '.rodata':
+  0x00000000 48656c6c 6f20776f 726c6400          Hello world.
+
+</pre>
+</div>
+
+<div class="slide">
+<h1>Arbitrary sections</h1>
+<pre>
+$ cat test.c
+const char my_section[] __attribute__((section(".my_section"))) = "Very cool stuff!";
+
+int main(int argc, char **argv) {
+	printf("Hello world\n");
+	return (0);
+}
+</pre>
+<pre>
+$ readelf -p .my_section test.o
+
+String dump of section '.my_section':
+  [     0]  Very cool stuff!
+</pre>
+</div>
+
+<div class="slide">
+<h1>Linking</h1>
+<pre>
+$ gcc test.o -o test
+$ readelf -l test
+
+Elf file type is EXEC (Executable file)
+Entry point 0x400430
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040
+                 0x00000000000001f8 0x00000000000001f8  R E    8
+  INTERP         0x0000000000000238 0x0000000000400238 0x0000000000400238
+                 0x000000000000001c 0x000000000000001c  R      1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x0000000000000714 0x0000000000000714  R E    200000
+  LOAD           0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x000000000000021c 0x0000000000000220  RW     200000
+  DYNAMIC        0x0000000000000e28 0x0000000000600e28 0x0000000000600e28
+                 0x00000000000001d0 0x00000000000001d0  RW     8
+  NOTE           0x0000000000000254 0x0000000000400254 0x0000000000400254
+                 0x0000000000000044 0x0000000000000044  R      4
+  GNU_EH_FRAME   0x00000000000005ec 0x00000000004005ec 0x00000000004005ec
+                 0x0000000000000034 0x0000000000000034  R      4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     10
+  GNU_RELRO      0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x00000000000001f0 0x00000000000001f0  R      1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame 
+   03     .init_array .fini_array .jcr .dynamic .got .got.plt .data .bss 
+   04     .dynamic 
+   05     .note.ABI-tag .note.gnu.build-id 
+   06     .eh_frame_hdr 
+   07     
+   08     .init_array .fini_array .jcr .dynamic .got 
+</pre>
+</div>
+
+<div class="slide">
+<h1>Linking</h1>
+<pre>
+$ gcc test.o -o test
+$ readelf -l test
+
+Elf file type is EXEC (Executable file)
+Entry point <span class="red">0x400430</span>
+There are 9 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040
+                 0x00000000000001f8 0x00000000000001f8  R E    8
+  INTERP         0x0000000000000238 0x0000000000400238 0x0000000000400238
+                 0x000000000000001c 0x000000000000001c  R      1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000
+                 0x0000000000000714 0x0000000000000714  R E    200000
+  LOAD           0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x000000000000021c 0x0000000000000220  RW     200000
+  DYNAMIC        0x0000000000000e28 0x0000000000600e28 0x0000000000600e28
+                 0x00000000000001d0 0x00000000000001d0  RW     8
+  NOTE           0x0000000000000254 0x0000000000400254 0x0000000000400254
+                 0x0000000000000044 0x0000000000000044  R      4
+  GNU_EH_FRAME   0x00000000000005ec 0x00000000004005ec 0x00000000004005ec
+                 0x0000000000000034 0x0000000000000034  R      4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     10
+  GNU_RELRO      0x0000000000000e10 0x0000000000600e10 0x0000000000600e10
+                 0x00000000000001f0 0x00000000000001f0  R      1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     
+   01     .interp 
+   02     .interp .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .plt.got .text .fini .rodata .eh_frame_hdr .eh_frame 
+   03     .init_array .fini_array .jcr .dynamic .got .got.plt .data .bss 
+   04     .dynamic 
+   05     .note.ABI-tag .note.gnu.build-id 
+   06     .eh_frame_hdr 
+   07     
+   08     .init_array .fini_array .jcr .dynamic .got 
+</pre>
+</div>
+
+<div class="slide">
+<h1>Linking</h1>
+<pre>
+$ nm test
+...
+00000000004005c0 T __libc_csu_fini
+0000000000400550 T __libc_csu_init
+                 U __libc_start_main@@GLIBC_2.2.5
+0000000000400526 T main
+                 U puts@@GLIBC_2.2.5
+00000000004004a0 t register_tm_clones
+0000000000400430 T _start
+0000000000601030 D __TMC_END__
+</pre>
+
+<pre>
+(gdb) disassemble 0x400430
+Dump of assembler code for function _start:
+   0x0000000000400430 <+0>:	xor    %ebp,%ebp
+   0x0000000000400432 <+2>:	mov    %rdx,%r9
+   0x0000000000400435 <+5>:	pop    %rsi
+   0x0000000000400436 <+6>:	mov    %rsp,%rdx
+   0x0000000000400439 <+9>:	and    $0xfffffffffffffff0,%rsp
+   0x000000000040043d <+13>:	push   %rax
+   0x000000000040043e <+14>:	push   %rsp
+   0x000000000040043f <+15>:	mov    $0x4005c0,%r8
+   0x0000000000400446 <+22>:	mov    $0x400550,%rcx
+   0x000000000040044d <+29>:	mov    $0x400526,%rdi
+   0x0000000000400454 <+36>:	callq  0x400410 <__libc_start_main@plt>
+   0x0000000000400459 <+41>:	hlt    
+</pre>
+</div>
+
+<div class="slide">
+<h1>Linker script</h1>
+</div>
+
+</body>
+</html>
