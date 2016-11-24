@@ -639,6 +639,10 @@ offsetof(struct foo, b): 4
 
 <div class="slide">
 <h1>Function prolog</h1>
+<ul>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ul>
 <pre>
 Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
    0x00007f3efa731880 <+0>:	push   %rbp
@@ -653,7 +657,50 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
+<h1>Function prolog</h1>
+<ul>
+	<li>Create stack frame</li>
+	<li>&nbsp;</li>
+</ul>
+<pre>
+Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
+   0x00007f3efa731880 <+0>:	<span class="red">push   %rbp</span>
+   0x00007f3efa731881 <+1>:	<span class="red">mov    %rsp,%rbp</span>
+   0x00007f3efa731884 <+4>:	push   %r15
+   0x00007f3efa731886 <+6>:	push   %r14
+   0x00007f3efa731888 <+8>:	push   %r13
+   0x00007f3efa73188a <+10>:	push   %r12
+   0x00007f3efa73188c <+12>:	mov    %rsi,%r12
+   0x00007f3efa73188f <+15>:	push   %rbx
+</pre>
+</div>
+
+<div class="slide">
+<h1>Function prolog</h1>
+<ul>
+	<li>Create stack frame</li>
+	<li>Store non-volatile registers</li>
+</ul>
+<pre>
+Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
+   0x00007f3efa731880 <+0>:	push   %rbp
+   0x00007f3efa731881 <+1>:	mov    %rsp,%rbp
+   0x00007f3efa731884 <+4>:	<span class="red">push   %r15</span>
+   0x00007f3efa731886 <+6>:	<span class="red">push   %r14</span>
+   0x00007f3efa731888 <+8>:	<span class="red">push   %r13</span>
+   0x00007f3efa73188a <+10>:	<span class="red">push   %r12</span>
+   0x00007f3efa73188c <+12>:	mov    %rsi,%r12
+   0x00007f3efa73188f <+15>:	<span class="red">push   %rbx</span>
+</pre>
+</div>
+
+<div class="slide">
 <h1>Function epilog</h1>
+<ul>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ul>
 <pre>
    0x00007f3efa731d89 <+1289>:	lea    -0x28(%rbp),%rsp
    0x00007f3efa731d8d <+1293>:	mov    %r8d,%eax
@@ -663,6 +710,66 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
    0x00007f3efa731d95 <+1301>:	pop    %r14
    0x00007f3efa731d97 <+1303>:	pop    %r15
    0x00007f3efa731d99 <+1305>:	pop    %rbp
+   0x00007f3efa731d9a <+1306>:	retq
+</pre>
+</div>
+
+<div class="slide">
+<h1>Function epilog</h1>
+<ul>
+	<li>Clean the stack variables</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ul>
+<pre>
+   0x00007f3efa731d89 <+1289>:	<span class="red">lea    -0x28(%rbp),%rsp</span>
+   0x00007f3efa731d8d <+1293>:	mov    %r8d,%eax
+   0x00007f3efa731d90 <+1296>:	pop    %rbx
+   0x00007f3efa731d91 <+1297>:	pop    %r12
+   0x00007f3efa731d93 <+1299>:	pop    %r13
+   0x00007f3efa731d95 <+1301>:	pop    %r14
+   0x00007f3efa731d97 <+1303>:	pop    %r15
+   0x00007f3efa731d99 <+1305>:	pop    %rbp
+   0x00007f3efa731d9a <+1306>:	retq
+</pre>
+</div>
+
+<div class="slide">
+<h1>Function epilog</h1>
+<ul>
+	<li>Clean the stack variables</li>
+	<li>Set the return value</li>
+	<li>&nbsp;</li>
+</ul>
+<pre>
+   0x00007f3efa731d89 <+1289>:	lea    -0x28(%rbp),%rsp
+   0x00007f3efa731d8d <+1293>:	<span class="red">mov    %r8d,%eax</span>
+   0x00007f3efa731d90 <+1296>:	pop    %rbx
+   0x00007f3efa731d91 <+1297>:	pop    %r12
+   0x00007f3efa731d93 <+1299>:	pop    %r13
+   0x00007f3efa731d95 <+1301>:	pop    %r14
+   0x00007f3efa731d97 <+1303>:	pop    %r15
+   0x00007f3efa731d99 <+1305>:	pop    %rbp
+   0x00007f3efa731d9a <+1306>:	retq
+</pre>
+</div>
+
+<div class="slide">
+<h1>Function epilog</h1>
+<ul>
+	<li>Clean the stack variables</li>
+	<li>Set the return value</li>
+	<li>Restore value of non-volatile registers</li>
+</ul>
+<pre>
+   0x00007f3efa731d89 <+1289>:	lea    -0x28(%rbp),%rsp
+   0x00007f3efa731d8d <+1293>:	mov    %r8d,%eax
+   0x00007f3efa731d90 <+1296>:	<span class="red">pop    %rbx</span>
+   0x00007f3efa731d91 <+1297>:	<span class="red">pop    %r12</span>
+   0x00007f3efa731d93 <+1299>:	<span class="red">pop    %r13</span>
+   0x00007f3efa731d95 <+1301>:	<span class="red">pop    %r14</span>
+   0x00007f3efa731d97 <+1303>:	<span class="red">pop    %r15</span>
+   0x00007f3efa731d99 <+1305>:	<span class="red">pop    %rbp</span>
    0x00007f3efa731d9a <+1306>:	retq
 </pre>
 </div>

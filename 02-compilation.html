@@ -285,6 +285,114 @@ String dump of section '.my_section':
 </div>
 
 <div class="slide">
+<h1>Compiler optimizations</h1>
+<ul>
+	<li>Compilers try to be smart on many thing:</li>
+	<ul>
+		<li>Function inlining</li>
+		<li?>Tail call / leaf optimizations</li>
+		<li>Remove unused variables</li>
+		<li>Reorder independent operations</li>
+		<li>Align data</li>
+	</ul>
+	<li>Do <em>not</em> confuse compiler reordering with machine reordering!</li>
+	<li>Some things can't be optimized out</li>
+	<ul>
+		<li>External symbols</li>
+		<li>volatile memory access</li>
+	</ul>
+<pre>
+gcc -O[0123]
+</pre>
+</div>
+
+<div class="slide">
+<h1>-O0 optimization example</h1>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+</td>
+<td>
+<pre>
+$ gcc -Wall -O0 -otest test.c
+$ gdb test
+(gdb) disassemble print_sum
+Dump of assembler code for function print_sum:
+push   %rbp
+mov    %rsp,%rbp
+sub    $0x10,%rsp
+mov    %edi,-0x4(%rbp)
+mov    %esi,-0x8(%rbp)
+mov    -0x4(%rbp),%edx
+mov    -0x8(%rbp),%eax
+add    %edx,%eax
+mov    %eax,%esi
+mov    $0x400610,%edi
+mov    $0x0,%eax
+callq  0x400400 &lt;printf@plt&gt;
+nop
+leaveq 
+retq   
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O0 optimization example</h1>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+</td>
+<td>
+<pre>
+$ gcc -Wall -O0 -otest test.c
+$ gdb test
+(gdb) disassemble print_sum
+Dump of assembler code for function print_sum:
+push   %rbp
+mov    %rsp,%rbp
+sub    $0x10,%rsp
+<span class="red">mov    %edi,-0x4(%rbp)</span>
+<span class="red">mov    %esi,-0x8(%rbp)</span>
+<span class="red">mov    -0x4(%rbp),%edx</span>
+<span class="red">mov    -0x8(%rbp),%eax</span>
+add    %edx,%eax
+mov    %eax,%esi
+mov    $0x400610,%edi
+mov    $0x0,%eax
+callq  0x400400 &lt;printf@plt&gt;
+nop
+leaveq 
+retq   
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
 <h1>Linking</h1>
 <pre>
 $ gcc test.o -o test
@@ -413,6 +521,21 @@ Dump of assembler code for function _start:
 
 <div class="slide">
 <h1>Linker script</h1>
+<ul>
+	<li>Describes how sections should be linked to segments</li>
+	<li>Describes virtual memory layout of the resulting binary</li>
+	<li>Passed to ld with -T option</li>
+	<li>gcc contains default linker script (link with -Wl,-verbose)</li>
+<pre>
+SECTIONS
+{
+  . = 0x10000;
+  .text : { *(.text) }
+  . = 0x8000000;
+  .data : { *(.data) }
+  .bss : { *(.bss) }
+}
+</pre>
 </div>
 
 </body>
