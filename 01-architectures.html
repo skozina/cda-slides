@@ -597,7 +597,10 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 <div class="slide">
 <h1>x86_86 System V ABI</h1>
 <ul>
-	<li>Mostly padded to 4-byte alignment</li>
+	<li>Data mostly padded to 4-byte alignment</li>
+	<ul>
+		<li>Stack (%rsp + 8) is required to be 16-bytes aligned for SSE instructions</li>
+	</ul>
 	<li>First 6 arguments passed via <em>%rdi, %rsi, %rdx, %rcx, %r8, %r9</em>.</li>
 	<li>The rest passed through the stack.</li>
 	<li>Return value passed through <em>%rax</em>.</li>
@@ -1059,6 +1062,21 @@ bar:
 </pre>
 </div>
 </div>
+</div>
+
+<div class="slide">
+<h1>Things to remember</h1>
+<ul>
+	<li>The %rip address stored by <em>call</em> instruction points to the original code</li>
+	<li>This address is used by debuggers to restore the call stack</li>
+	<li>If the address is not stored on the stack, the function won't be visible in the stack trace</li>
+	<ul>
+		<li>Inlined functions<li>
+		<li>Tail call optimization where function is "called" used <em>jmp</em> instruction</li>
+	</ul>
+	<li>The %rsp points to the first <em>unused</em> field on the stack</li>
+	<li>(%rbp + 8) is required to be 16-bytes aligned by ABI</li>
+</ul>
 </div>
 
 <div class="slide cover">
