@@ -67,12 +67,18 @@ table tr td.dark {
 	background-color: #dcdcdc;
 }
 
-img.right {
-	float: right;
+img {
+	padding-left: 1em;
 }
 
 p.right {
 	text-align: right;
+}
+
+div.right {
+	z-index: 10;
+	position: absolute;
+	right: 0;
 }
 
 p.grey {
