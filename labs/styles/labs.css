@@ -1,0 +1,136 @@
+body
+{
+  font-family: "overpass";
+  font-size: 20pt;
+  src: url(overpass/Overpass-Regular.ttf);
+}
+
+div.background {
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  padding: 0 0.8em 0 0.8em;
+}
+
+div.background img.cover {
+   float: left;
+   width: 10em;
+}
+
+div.slide h1 {
+  padding-top: 0.8em;
+}
+
+div.slide.cover {
+  background: #728ec2 url("../graphics/kerio-background.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  display: flex;
+  /* flex-direction: column;*/
+  align-items: center;
+  /* justify-content: center;*/
+  color: black;
+  padding: 0 0.8em 0 0.8em;
+}
+
+div.slide {
+  background-image: url("../graphics/kerio-background.png");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;*/
+}
+
+div.slide.cover img.cover {
+   float: left;
+   width: 10em;
+}
+
+#head-logo {
+  background: #728ec2;
+  width: auto;
+  height: 75%;
+}
+
+#head-icon {
+  background: transparent;
+  width: auto;
+}
+
+#kerio-header {
+  background: #728ec2;
+  width: auto;
+}
+
+ul li { 
+  background: transparent url(../graphics/bullet.png) no-repeat 5px;
+}
+
+table {
+	width: 80%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+table tr.border td {
+	border:0.1em solid black;
+}
+
+table tr.border th {
+	text-align: left;
+}
+
+table tr td.border {
+	border:0.1em solid black;
+}
+
+table tr td.dark {
+	background-color: #dcdcdc;
+}
+
+img {
+	padding-left: 1em;
+}
+
+p.right {
+	text-align: right;
+}
+
+div.right {
+	z-index: 10;
+	position: absolute;
+	right: 0;
+}
+
+p.grey {
+	color: #dcdcdc;
+}
+
+.red {
+	color: red;
+}
+
+.blue {
+	color: #728ec2;
+}
+
+div.table {
+	display: flex;
+}
+
+div.table.fill {
+	flex-item: 1;
+}
+
+div.toolbar {
+  color: #4c4c4c;
+  background-color: #dcdcdc;
+}
+
+div.toolbar span.copyright {
+  color: #4c4c4c;
+}
+
+.toolbar a:link {color: #4c4c4c}
+.toolbar a:visited {color: #4c4c4c}
+.toolbar a:active {color: #4c4c4c}
+.toolbar a:hover {color: #4c4c4c}

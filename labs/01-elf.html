@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Lab 1. - Decomposition of an ELF binary file</title>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <meta name="copyright"
+   content="Copyright &#169; 2017 Petr Holášek <pholasek@kerio.com>" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print" href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print" href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8" type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/labs.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="bca" src="images/bca.png" />
+</div>
+
+<div class="slide cover">
+ <div>
+	 <img src="graphics/kerio-logo.png" alt="Kerio logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>Decomposition of an ELF binary file</h2>
+ <br>
+ <p>Petr Holášek &lt;pholasek@kerio.com&gt;<br>
+ Kerio Control team, Kerio Technologies<br>
+ &copy; February 2017</p>
+ </div>
+</div>
+
+<div class="slide">
+	<h1>Lab exercises</h1>
+	<ul>
+		<li>5 x 1,5 hours</li>
+		<li>odd Mondays 09:00-10:50, even Tuesdays 08:00-09:50 [FIT VUT, Q305]</li>
+		<li>attendance is recommended</li>
+		<li>will help you with classified homeworks</li>
+	</ul>
+</div>
+<div class="slide">
+	<h1>Useful sources</h1>
+        <ul>
+                <li><a href="http://www.dedoimedo.com/computers/crash-book.html">Ljubuncic, I.: Linux Kernel Crash Book, 2011</a></li>
+                <li>Drake, C., Brown, K.: Panic! UNIX System Crash Dump Analysis, Prentice Hall, 1995.</li>
+                <li><a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/ref/book.pdf"</a>Hofmann, F.: The Solaris Operating System on x86 Platforms, Crashdump Analysis, Operating System Internals, 2005</li>
+                <li><a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html">Intel Corporation: Intel 64 and IA-32 Architectures Software Developer Manuals, 2015</a></li>
+                <li><a href="http://www.x86-64.org/documentation/abi.pdf">Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013</a></li>
+                <li>The OSDev wiki (<a href="http://wiki.osdev.org">http://wiki.osdev.org</a>)</li>
+		<li><pre>man objdump, gcc, crash, ...</pre></li>
+        </ul>
+</div>
+
+<div class="slide">
+	<h1>Syllabus of lab exercises</h1>
+	<ul>
+	        <li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
+		<li>Compilation and linking of ELF binary file</li>
+                <li>Using the crash tool on Linux.</li>
+                <li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
+                <li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Q305 lab environment</h1>
+	<ul>
+		<li>RHEV-M managed VMs instantiated from prepared templates</li>
+		<li>VMs include the base of Fedora distribution</li>
+		<li>There is no graphic environment (why?)</li>
+		<li>System should include all necessary tools</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Decomposition of an ELF binary file, decoding its sections, and code disassembling</h1>
+	<ul class="incremental">
+		<li>Create simple object file</li>
+		<li><pre>vim hello.c</pre></li>
+		<li><pre>
+#include <stdio.h>
+
+int main(int argc, char **argv)
+{
+	printf("Hello world\n");
+	return 0;
+}
+		</pre></li>
+		<li><pre>gcc -O0 -Wall -c -o hello.o hello.c</pre></li>
+	</ul>
+</div>
+
+</body>
+</html>
