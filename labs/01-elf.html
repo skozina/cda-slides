@@ -55,13 +55,14 @@
 
 <div class="slide">
 	<h1>Syllabus of lab exercises</h1>
-	<ul>
+	<ol>
 	        <li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
-		<li>Compilation and linking of ELF binary file</li>
+	        <li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
                 <li>Using the crash tool on Linux.</li>
                 <li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
                 <li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
-	</ul>
+                <li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
+	</ol>
 </div>
 
 <div class="slide">
@@ -89,6 +90,86 @@ int main(int argc, char **argv)
 }
 		</pre></li>
 		<li><pre>gcc -O0 -Wall -c -o hello.o hello.c</pre></li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Decomposition of an ELF binary file, decoding its sections, and code disassembling</h1>
+	<ul class="incremental">
+		<li>Create simple object file</li>
+		<li><pre>$ vim hello.c</pre></li>
+		<li><pre>
+#include <stdio.h>
+
+int main(int argc, char **argv)
+{
+	printf("Hello world\n");
+	return 0;
+}
+		</pre></li>
+		<li><pre>$ gcc -O0 -Wall -c -o hello.o hello.c</pre></li>
+		<li><pre>$ gdb hello.o</pre></li>
+		<li>What content you can find on stack before call to printf()?</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Decomposition of an ELF binary file, decoding its sections, and code disassembling</h1>
+	<ul class="incremental">
+		<li>List ELF file header:</li>
+		<li><pre>$ readelf -h hello.o</pre></li>
+		<li>What does REL type mean?</li>
+		<li>What is magic?</li>
+		<li>List ELF section headers:</li>
+		<li><pre>$ readelf -S hello.o</pre></li>
+		<li>Wher you can find "Hello world\n" string?</li>
+		<li><pre>$ readelf -x .rodata test.o</pre></li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Decomposition of an ELF binary file, decoding its sections, and code disassembling</h1>
+	<ul class="incremental">
+		<li>Try to add your custom section my_section to ELF file containing some string:</li>
+		<li>Hint - use gcc variable attribute.</li>
+		<li><pre>__attribute__((section(xxx)))</pre></li>
+		<li><pre>const char my_section[] __attribute__((section(".my_section"))) = "Very cool stuff!";</pre></li>
+		<li>Dump the section as printable string.</li>
+		<li><pre>$ readelf -p .my_section test.o</pre></li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Linking</h1>
+	<ul class="incremental">
+		<li>Process of merging sections from source object files into resulting executable segments</li>
+		<li><pre>$ gcc hello.o -o hello</pre></li>
+		<li><pre>$ readelf -l test</pre></li>
+		<li>How did we linked printf() call?</li>
+		<li>List all symbols.</li>
+		<li><pre>$ nm test</pre></li>
+		<li>Try to write linking script - section .text put at 0xdeadbeef and add 0x1000 gap after it</li>
+		<li><pre>$ gcc -c hello.c</pre></li>
+		<li><pre>$ ld -o hello_mod -T custom.lds hello.o</pre></li>
+	</ul>
+</div>
+
+
+<div class="slide">
+	<h1>Dynamic linker</h1>
+	<ul class="incremental">
+		<li>Show all needed dynamic libraries for the program</li>
+		<li><pre>$ readelf -d hello</pre></li>
+		<li>Is there another way how to do it?</li>
+		<li><pre>$ ldd test</pre></li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Homework 1</h1>
+	<ul>
+		<li>You can find your task there: TODO</li>
+		<li>Deadline: xx.xx.2017</li>
 	</ul>
 </div>
 
