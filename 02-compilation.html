@@ -5,6 +5,7 @@
   <title>Binary Code Analysis - Agenda</title>
   <meta name="copyright"
    content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
    href="styles/slidy.css" />
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
@@ -849,6 +850,70 @@ Dynamic section at offset 0xe28 contains 24 entries:
 	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f2d1e019000)
 	/lib64/ld-linux-x86-64.so.2 (0x0000563858ee0000)
 </pre>
+</div>
+
+<div class="slide">
+<h1>System call</h1>
+<ul>
+	<li>The way userland application requests service from the kernel</li>
+	<li>On Intel typically done by <em>int 0x80</em> or <em>syscall/sysret</em> instruction</li>
+</ul>
+<pre>
+ssize_t write(int fd, const void *buf, size_t count);
+</pre>
+<pre>
+Dump of assembler code for function write:
+   0x00007ffff7b08c10 <+0>:	cmpl   $0x0,0x2cdae9(%rip)        # 0x7ffff7dd6700 <__libc_multiple_threads>
+   0x00007ffff7b08c17 <+7>:	jne    0x7ffff7b08c29 <write+25>
+=&gt; 0x00007ffff7b08c19 <+0>:	mov    $0x1,%eax
+   0x00007ffff7b08c1e <+5>:	syscall 
+</pre>
+</div>
+
+<div class="slide">
+<h1>strace</h1>
+<ul>
+	<li>Allows tracing of syscalls done by target process</li>
+	<li>Built on top of <em>ptrace</em> interface</li>
+	<ul>
+		<li>ptrace is used for process tracing</li>
+		<li>Allows monitoring of received traps</li>
+		<li>Also allows tracing of syscalls and changes in memory of target process</li>
+		<li>Used eg. by strace, ltrace and gdb</li>
+	</ul>
+</ul>
+<pre>
+$ strace ./prog &ht; /dev/null
+execve("./prog", ["./prog"], [/* 47 vars */]) = 0
+brk(NULL)                               = 0x2009000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f08d1e08000
+&hellip;
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+&hellip;
+write(1, "Hello world!\n", 13)          = 13
+&hellip;
+</pre>
+</div>
+
+<div class="slide">
+<h1>ltrace</h1>
+<ul>
+	<li>Also built on top of <em>ptrace</em></li>
+	<li>Intercepts library function address in .got.plt with <em>int 0x3</em></li>
+	<li>The int instruction causes <em>SIGTRAP</em></li>
+	<li>The signal can be detected through the <em>ptrace</em> interface</li>
+</ul>
+<pre>
+$ ltrace ./prog &gt; /dev/null
+write(1, "Hello world!\n", 13)  = 13
++++ exited (status 0) +++
+</pre>
+</div>
+
+<div class="slide">
+<h1>Linux Performance Observability tools</h1>
+<img height=70% alt="Linux Performance Observability tools" src="images/linux_observability_tools.png"/>
+<p class="right grey">Source: http://www.brendangregg.com</p>
 </div>
 
 </body>
