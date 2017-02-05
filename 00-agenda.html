@@ -52,8 +52,13 @@
 	<h1>Course overview</h1>
 	<ul>
 		<li>Lectures (biweekly)</li>
+			<ul>
+				<li>Monday 9:00, A112, even weeks</li>
+			</ul>
 		<li>Computer labs in the Red Hat laboratory (biweekly)</li>
 		<ul>
+				<li>Monday 9:00, A112, odd weeks</li>
+				<li>Tuesday 8:00, A112, even weeks</li>
 			<li>In groups of 10<li>
 		</ul>
 		<li>A final test for 40 points</li>
@@ -63,12 +68,11 @@
 
 <div class="slide">
 	<h1>Motivation and goals</h1>
-	<blockquote>To present the tools and techniques which allow us to observe the behavior of a modern computer system.</blockquote>
+	<blockquote>To present the basic operation of a modern computer system.</blockquote>
 	<ul>
-		<li>Present tools for observing both the userland and kernel code</li>
-		<li>Take a closer look at the basic system operations</li>
-		<li>Debug a system crashes from crashdump</li>
-		<li>An excellent <a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/">Crash Dump Analysis</a> course at <a href="http://www.mff.cuni.cz/to.en/">MFF CUNI</a>.</li>
+		<li>Present tools and techniques for observing both the userland and kernel code</li>
+		<li>Take a closer look at the binary file structure</li>
+		<li>Debug a system crash using crash dump</li>
 	</ul>
 </div> 
 
@@ -83,14 +87,14 @@
 				</ul>
 			</td>
 			<td>
-				<img class="right" alt="Kerio" style="width: 5em;" src="images/kerio.png"/> 
+				<img class="right" alt="Kerio" style="height: 3em;" src="images/kerio-logo.png"/>
 			</td>
 		</tr>
 	</table>
 </div> 
 
 <div class="slide">
-	<h1>Syllabus of lectures:</h1>
+	<h1>Syllabus of lectures</h1>
 	<ol>
 		<li>Computer architectures in general, registers, implicit and explicit stack operations. The x86 and x86_64 computer architectures, common instructions. System V ABI on x86_64 architecture, red zone.</li>
 		<li>Compilation, linking, and running code. Examples of compiler optimizations, stack optimizations (leaf and tail calls, function inlining), linker script, understanding of the Unix binary file (ELF, objdump).</li>
@@ -100,7 +104,7 @@
 </div> 
 
 <div class="slide">
-	<h1>Syllabus of lectures (cont):</h1>
+	<h1>Syllabus of lectures (cont)</h1>
 	<ol start=5>
 		<li>Kernel process and memory management, task_struct, vmas, SLAB allocator.</li>
 		<li>Interrupt processing, postponing work, bottom halves, softirqs and tasklets, work queues.</li>
@@ -109,7 +113,7 @@
 </div> 
 
 <div class="slide">
-	<h1>Syllabus of computer exercises:</h1>
+	<h1>Syllabus of computer exercises</h1>
 	<ol>
 		<li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
 		<li>Using the crash(1) tool on Linux.</li>
@@ -140,6 +144,7 @@
 		<li><a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html">Intel Corporation: Intel 64 and IA-32 Architectures Software Developer Manuals, 2015</a></li>
 		<li><a href="http://www.x86-64.org/documentation/abi.pdf">Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013</a></li>
 		<li>The OSDev wiki (<a href="http://wiki.osdev.org">http://wiki.osdev.org</a>)</li>
+		<li>An excellent <a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/">Crash Dump Analysis</a> course at <a href="http://www.mff.cuni.cz/to.en/">MFF CUNI</a>.</li>
 	</ul>
 </div> 
 

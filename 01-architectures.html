@@ -471,6 +471,36 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
+<h1>Assembly syntax</h1>
+<ul>
+	<li>Intel syntax vs. AT&amp;T syntax</li>
+	<li>We'll use that later because that's what *NIX tools do</li>
+</ul>
+<table>
+	<tr class="border">
+	<th>Intel</th>
+	<th>AT&amp;T</th>
+	</tr>
+	<tr>
+		<td>
+<pre>
+movw $0x3, %rax
+movq 0x8(%rax, %rcx, 2), %rsi
+addl $0x1000, %esi
+</pre>
+		</td>
+		<td>
+<pre>
+MOV AX, 0x3
+MOV RSI, [ RAX + 2*RCX + 8 ]
+ADD ESI, 0x1000
+</pre>
+		</td>
+	</tr>
+</table>
+</div>
+
+<div class="slide">
 <h1>Addressing modes</h1>
 <ul>
 	<li>x86 allows indirect addressing with offset, index and scale</li>
@@ -503,36 +533,6 @@ movl   $0x3,0xc(%rsp)
 movslq 0xc(%rsp),%rax
 mov    0x4(%rdi,%rax,8),%esi
 </pre>
-</div>
-
-<div class="slide">
-<h1>Assembly syntax</h1>
-<ul>
-	<li>Intel syntax vs. AT&amp;T syntax</li>
-	<li>We'll use that later because that's what *NIX tools do</li>
-</ul>
-<table>
-	<tr class="border">
-	<th>Intel</th>
-	<th>AT&amp;T</th>
-	</tr>
-	<tr>
-		<td>
-<pre>
-movw $0x3, %rax
-movq 0x8(%rax, %rcx, 2), %rsi
-addl $0x1000, %esi
-</pre>
-		</td>
-		<td>
-<pre>
-MOV AX, 0x3
-MOV RSI, [ RAX + 2*RCX + 8 ]
-ADD ESI, 0x1000
-</pre>
-		</td>
-	</tr>
-</table>
 </div>
 
 <div class="slide">
@@ -1103,6 +1103,25 @@ bar:
 	<li>A small associative cache used for fast VMA-&gt;PMA translation</li>
 	<li>Skylake has ~4KB ITLB, ~4KB DTLB</li>
 	<li>Other architectures don't maintain TLB automatically - <em>TLB miss</em> trap.</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Unaligned access trap</h1>
+<ul>
+	<li>Some CPUs might trap when access is not naturally / 16 bytes aligned</li>
+		<ul>
+			<li>ARM, MIPS, SPARC, &hellip;</li>
+		</ul>
+	<li>Intel CPUs are significantly slower when operating on unaglined data</li>
+		<ul>
+			<li>Across 64-byte cache line</li>
+			<li>Much worse when across page boundary</li>
+			<li>Up until Nehalem / Sandy Bridge?</li>
+			<li>Still traps on unaligned access using SSE instruction</li>
+		</ul>
+	<li>
+	<li>gcc __attribute__((aligned(16)));</li>
 </ul>
 </div>
 
