@@ -474,7 +474,7 @@ int a = 0x12345678;
 <h1>Assembly syntax</h1>
 <ul>
 	<li>Intel syntax vs. AT&amp;T syntax</li>
-	<li>We'll use that later because that's what *NIX tools do</li>
+	<li>We'll use the latter because that's what *NIX tools do</li>
 </ul>
 <table>
 	<tr class="border">
@@ -1074,9 +1074,12 @@ bar:
 	<li>If the address is not stored on the stack, the function won't be visible in the stack trace</li>
 	<ul>
 		<li>Inlined functions<li>
-		<li>Tail call optimization where function is "called" used <em>jmp</em> instruction</li>
+		<li>Tail call optimization where function is "called" using the <em>jmp</em> instruction</li>
 	</ul>
-	<li>The %rsp points to the first <em>unused</em> field on the stack</li>
+	<li>The %rsp points to the last <em>occupied</em> field on the stack</li>
+	<ul>
+		<li><em>push</em> instruction first decrements %rsp, then stores the value</li>
+	</ul>
 	<li>(%rbp + 8) is required to be 16-bytes aligned by ABI</li>
 </ul>
 </div>
