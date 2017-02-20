@@ -478,8 +478,8 @@ int a = 0x12345678;
 </ul>
 <table>
 	<tr class="border">
-	<th>Intel</th>
 	<th>AT&amp;T</th>
+	<th>Intel</th>
 	</tr>
 	<tr>
 		<td>
@@ -583,7 +583,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 
 <div class="slide cover">
  <br clear="all" />
- <h1>x86_86 System V ABI</h1>
+ <h1>x86_64 System V ABI</h1>
 </div>
 
 <div class="slide">
@@ -597,7 +597,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 </div>
 
 <div class="slide">
-<h1>x86_86 System V ABI</h1>
+<h1>x86_64 System V ABI</h1>
 <ul>
 	<li>Data mostly padded to 4-byte alignment</li>
 	<ul>
@@ -774,7 +774,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
    0x00007f3efa731d93 <+1299>:	<span class="red">pop    %r13</span>
    0x00007f3efa731d95 <+1301>:	<span class="red">pop    %r14</span>
    0x00007f3efa731d97 <+1303>:	<span class="red">pop    %r15</span>
-   0x00007f3efa731d99 <+1305>:	<span class="red">pop    %rbp</span>
+   0x00007f3efa731d99 <+1305>:	pop    %rbp
    0x00007f3efa731d9a <+1306>:	retq
 </pre>
 </div>
