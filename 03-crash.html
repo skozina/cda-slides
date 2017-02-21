@@ -401,8 +401,46 @@ BOOT_IMAGE=/vmlinuz-4.8.0 root=UUID=e59cb8c4-4f3d-43fc-b575-4c020dc92909 ro cras
 </div>
 
 <div class="slide">
-<h1>Linux kdump</h1>
-<p>TODO: Running crash </p>
+<h1>Opening the vmcore</h1>
+<ul>
+	<li>The tool for working with the vmcore is <em>crash</em></li>
+	<li><em>crash</em> internally uses gdb for processing the vmcore</li>
+	<li>But it often modifies the output from gdb</li>
+	<li>It can run on a vmcore file</li>
+<pre>
+# crash /lib/modules/4.8.0/build/vmlinux /var/crash/127.0.0.1-2017-02-17-16\:48\:37/vmcore
+</pre>
+	<li>It can also run a live system</li>
+<pre>
+# crash /lib/modules/4.8.0/build/vmlinux
+</pre>
+	<li>The vmlinux file provided needs to contain the DWARF debugging information</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Opening the vmcore</h1>
+<pre>
+# crash
+&hellip;
+      KERNEL: /lib/modules/4.8.0/build/vmlinux
+    DUMPFILE: /dev/mem
+        CPUS: 1
+        DATE: Tue Feb 21 16:55:42 2017
+      UPTIME: 1 days, 07:58:32
+LOAD AVERAGE: 0.21, 0.07, 0.02
+       TASKS: 73
+    NODENAME: cda-test1
+     RELEASE: 4.8.0
+     VERSION: #7 SMP Tue Nov 22 15:59:45 CET 2016
+     MACHINE: x86_64  (3198 Mhz)
+      MEMORY: 1 GB
+         PID: 3782
+     COMMAND: "crash"
+        TASK: ffff88003b2dd580  [THREAD_INFO: ffff88003bbe0000]
+         CPU: 0
+       STATE: TASK_RUNNING (ACTIVE)
+</pre>
 </div>
 
 <div class="slide cover">
