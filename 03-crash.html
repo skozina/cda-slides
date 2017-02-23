@@ -238,7 +238,7 @@ eflags         0x10202	[ IF RF ]
 </div>
 
 <div class="slide">
-<h1>Printing the stack</h1>
+<h1>Basic analysis</h1>
 <pre>
 (gdb) print $rsp
 $1 = (void *) 0x7ffded63b6c0
@@ -295,10 +295,11 @@ $4 = (void *) 0x7ffded63b6d0
 <div class="slide">
 <h1>Things to remember</h1>
 <ul>
-	<li>push first decrements %rsp, then stores the value</li>
+	<li><em>push</em> first decrements %rsp, then stores the value</li>
 	<ul>
 		<li>So the $rsp points to the last <em>used</em>value</li>
 	</ul>
+	<li><em>call</em> pushes on the stack the address of the <em>next</em> instructio. after call</li>
 	<li>Always read the assembly from the top of the function and go down!</li>
 	<li>Often arguments get copied to the non-volatile registers which are then stored on stack</li>
 </ul>
@@ -366,15 +367,64 @@ CR2: 0000000000000000
 </div>
 
 <div class="slide">
-<h1>Linux Oops</h1>
+<h1>Common type of bugs</h1>
+<ul>
+	<li>All kinds of memory corruption bugs</li>
+	<ul>
+		<li>It all boils down to the failure in page tables</li>
+	</ul>
+	<li><em>Soft lockup</em> &mdash; scheduling doesn't work for some time</li>
+	<li><em>Hard lockup</em> &mdash; IRQs are not being processed for some time</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Magical SysRq key</h1>
+<ul>
+	<li>Several operations can be done through a magic key</li>
+	<ul>
+		<li>Panic, reboot, sync fs, dump processes, SIGINT/SIGKILL processes</li>
+	</ul>
+	<li>Can be also activated by writing to <em>/proc/sysrq-trigger</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Linux taint flags</h1>
+<ul>
+	<li>Basic list of important events which have happened to the kernel</li>
+	<ul>
+		<li><em>TAINT_PROPRIETARY_MODULE</em> &mdash; non-GPL module loaded</li>
+		<li><em>TAINT_MACHINE_CHECK</em> &mdash; MCE detected</li>
+		<li><em>TAINT_OOT_MODULE</em> &mdash; Out of tree module</li>
+		<li><em>TAINT_LIVEPATCH</em> &mdash; kpatch</li>
+	</ul>
+	<li>Defined in <em>include/linux/kernel.h</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Stack unwinding</h1>
 <ul>
 	<li>Oops helps us to see the stack and identify faulting code path</li>
 	<li>Doesn't help much when some other task is involved in the crash</li>
 	<li>Watch out for the -fomit-frame-pointer</li>
 	<ul>
-		<li>Reliable address only if %rsp == %rbp + sizeof (long)</li>
+		<li>The function address is detected if it belongs to the .text segment</li>
+		<li>Reliable address only if %rsp == %rbp + sizeof (void *)</li>
+		<li>If not reliable, a question mark (?) is printed</li>
 		<li>CONFIG_FRAME_POINTER</li>
 	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Other debug options</h1>
+<ul>
+	<li><em>DEBUG_SLAB</em> &mdash; poison buffers allocated by SLAB allocator</li>
+	<li><em>DEBUG_KASAN</em> &mdash; instrument kernel with the ASan technique</li>
+	<li><em>DEBUG_STACKOVERFLOW</em> &mdash; check for overflow of the stack</li>
+	<li><em>PROVE_LOCKING</em> &mdash; ensure that the locks don't form a circle</li>
 </ul>
 </div>
 
@@ -442,6 +492,52 @@ LOAD AVERAGE: 0.21, 0.07, 0.02
        STATE: TASK_RUNNING (ACTIVE)
 </pre>
 </div>
+
+<div class="slide">
+<h1>Looking around</h1>
+<ul>
+	<li>help &mdash; prints list of all commands</li>
+	<li>mod -S &mdash; load debug information for all loaded modules</li>
+	<li>set hex &mdash; set crash output to hex</li>
+	<ul>
+		<li>Doesn't change the gdb output base;-/</li>
+	</ul>
+	<li>sys &mdash; basic system information</li>
+	<li>mach [-m|-c] &mdash; machine specific information</li>
+	<li>dev &mdash; character and block devices</li>
+	<li>net &mdash; network devices</li>
+	<li>log &mdash; system log buffer</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Process related stuff</h1>
+<ul>
+	<li>ps &mdash; process listing</li>
+	<li>runq &mdash; runqueue listing</li>
+	<li>bt &mdash; print stack</li>
+	<ul>
+		<li>bt -a &mdash; print stack for all cpus</li>
+		<li>bt -f &mdash; print the raw content of the stack frame</li>
+	</ul>
+	<li>vm</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Memory related stuff</h1>
+<ul>
+	<li>kmem</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Task states</h1>
+<ul>
+	<li><em>TASK_RUNNING</em> &mdash; On the CPU or runq</li>
+	<li><em>TASK_INTERUPTIBLE</em> &mdash; Wait for an event or until a signal is received</li>
+	<li><em>TASK_UNINTERUPTIBLE</em> &mdash; Wait while ignoring signals</li>
+</ul>
 
 <div class="slide cover">
  <div>
