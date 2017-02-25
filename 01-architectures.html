@@ -474,12 +474,12 @@ int a = 0x12345678;
 <h1>Assembly syntax</h1>
 <ul>
 	<li>Intel syntax vs. AT&amp;T syntax</li>
-	<li>We'll use that later because that's what *NIX tools do</li>
+	<li>We'll use the latter because that's what *NIX tools do</li>
 </ul>
 <table>
 	<tr class="border">
-	<th>Intel</th>
 	<th>AT&amp;T</th>
+	<th>Intel</th>
 	</tr>
 	<tr>
 		<td>
@@ -583,7 +583,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 
 <div class="slide cover">
  <br clear="all" />
- <h1>x86_86 System V ABI</h1>
+ <h1>x86_64 System V ABI</h1>
 </div>
 
 <div class="slide">
@@ -597,7 +597,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 </div>
 
 <div class="slide">
-<h1>x86_86 System V ABI</h1>
+<h1>x86_64 System V ABI</h1>
 <ul>
 	<li>Data mostly padded to 4-byte alignment</li>
 	<ul>
@@ -774,7 +774,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
    0x00007f3efa731d93 <+1299>:	<span class="red">pop    %r13</span>
    0x00007f3efa731d95 <+1301>:	<span class="red">pop    %r14</span>
    0x00007f3efa731d97 <+1303>:	<span class="red">pop    %r15</span>
-   0x00007f3efa731d99 <+1305>:	<span class="red">pop    %rbp</span>
+   0x00007f3efa731d99 <+1305>:	pop    %rbp
    0x00007f3efa731d9a <+1306>:	retq
 </pre>
 </div>
@@ -1074,9 +1074,12 @@ bar:
 	<li>If the address is not stored on the stack, the function won't be visible in the stack trace</li>
 	<ul>
 		<li>Inlined functions<li>
-		<li>Tail call optimization where function is "called" used <em>jmp</em> instruction</li>
+		<li>Tail call optimization where function is "called" using the <em>jmp</em> instruction</li>
 	</ul>
-	<li>The %rsp points to the first <em>unused</em> field on the stack</li>
+	<li>The %rsp points to the last <em>occupied</em> field on the stack</li>
+	<ul>
+		<li><em>push</em> instruction first decrements %rsp, then stores the value</li>
+	</ul>
 	<li>(%rbp + 8) is required to be 16-bytes aligned by ABI</li>
 </ul>
 </div>
@@ -1123,6 +1126,14 @@ bar:
 	<li>
 	<li>gcc __attribute__((aligned(16)));</li>
 </ul>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
 </div>
 
 </body>

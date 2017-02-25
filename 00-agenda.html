@@ -1,42 +1,42 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"> 
-<head> 
-  <title>Binary Code Analysis - Agenda</title> 
-  <meta name="copyright" 
-   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" /> 
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Agenda</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-  <link rel="stylesheet" type="text/css" media="screen, projection, print" 
-   href="styles/slidy.css" /> 
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
    href="styles/w3c-blue.css" />
   <script src="scripts/slidy.js" charset="utf-8"
-   type="text/javascript"></script> 
+   type="text/javascript"></script>
   <link rel="stylesheet" type="text/css" href="styles/cda.css" />
 </head>
 
 <body>
 
-<div class="background"> 
-  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" /> 
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
   <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
 </div>
- 
-<div class="slide cover"> 
+
+<div class="slide cover">
  <div>
- <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" /> 
- <br clear="all" />            
- <h1>Binary Code Analysis</h1> 
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
  <h2>Agenda</h2>
  <p>Stanislav Kozina<br>
  Associate Manager, Software Engineering, Red Hat<br>
- &copy; January 2016</p> 
+ &copy; January 2016</p>
  </div>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Details</h1>
-	<img class="right" alt="FIT logo" src="images/FIT_zakladni_provedeni_loga_barva_EN.png"/> 
+	<img class="right" alt="FIT logo" src="images/FIT_zakladni_provedeni_loga_barva_EN.png"/>
 	<ul>
 		<li>Code:   IAN</li>
 		<li>Ac.Year:    2016/2017</li>
@@ -46,7 +46,7 @@
 		<li>Completion: classified accreditation</li>
 		<li><a href="http://www.fit.vutbr.cz/study/course-l.php.en?id=11309">http://www.fit.vutbr.cz/study/course-l.php.en?id=11309</a></li>
 	</ul>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Course overview</h1>
@@ -67,6 +67,19 @@
 </div>
 
 <div class="slide">
+	<h1>Important links</h1>
+	<ul>
+		<li>RHEV-M user portal</li>
+		<ul>
+		<li><a href="https://rh-evm.fit.vutbr.cz/ovirt-engine/userportal">https://rh-evm.fit.vutbr.cz/ovirt-engine/userportal</a></li>
+		</ul>
+		<li>Console access to VMs</li>
+		<ul>
+		<li>$ ssh -t -p 2222 ovirt-vmconsole@rh-evm.fit.vutbr.cz</li>
+		</ul>
+</div>
+
+<div class="slide">
 	<h1>Motivation and goals</h1>
 	<blockquote>To present the basic operation of a modern computer system.</blockquote>
 	<ul>
@@ -74,7 +87,7 @@
 		<li>Take a closer look at the binary file structure</li>
 		<li>Debug a system crash using crash dump</li>
 	</ul>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>People</h1>
@@ -91,7 +104,7 @@
 			</td>
 		</tr>
 	</table>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Syllabus of lectures</h1>
@@ -101,7 +114,7 @@
 		<li>Linux crash dump analysis, DWARF debug symbols, using the crash(8) tool.</li>
 		<li>Linux crash dump analysis, understanding kernel Oops, kernel flags, sysrq.</li>
 	</ol>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Syllabus of lectures (cont)</h1>
@@ -110,7 +123,7 @@
 		<li>Interrupt processing, postponing work, bottom halves, softirqs and tasklets, work queues.</li>
 		<li>Live kernel tracing (SystemTap, ftrace), locks, deadlocks and hangs and their analysis and reconstruction.</li>
 	</ol>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Syllabus of computer exercises</h1>
@@ -122,7 +135,7 @@
 		<li>System tracing using SystemTap and ftrace.</li>
 		<li>Tracing and analysis of system deadlocks. </li>
 	</ol>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Required skills</h1>
@@ -133,7 +146,7 @@
 		<li>English language</li>
 		<li>Basic UNIX shell usage</li>
 	</ul>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Literature</h1>
@@ -142,12 +155,12 @@
 		<li>Drake, C., Brown, K.: Panic! UNIX System Crash Dump Analysis, Prentice Hall, 1995.</li>
 		<li><a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/ref/book.pdf"</a>Hofmann, F.: The Solaris Operating System on x86 Platforms, Crashdump Analysis, Operating System Internals, 2005</li>
 		<li><a href="http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html">Intel Corporation: Intel 64 and IA-32 Architectures Software Developer Manuals, 2015</a></li>
-		<li><a href="http://www.x86-64.org/documentation/abi.pdf">Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013</a></li>
+		<li><a href="https://www.uclibc.org/docs/psABI-x86_64.pdf">Matz, M., Hubicka, J., Mitchell, M.: System V Application Binary Interface, AMD64 Architecture Processor Supplement, 2013</a></li>
 		<li>The OSDev wiki (<a href="http://wiki.osdev.org">http://wiki.osdev.org</a>)</li>
 		<li>An excellent <a href="http://d3s.mff.cuni.cz/teaching/crash_dump_analysis/">Crash Dump Analysis</a> course at <a href="http://www.mff.cuni.cz/to.en/">MFF CUNI</a>.</li>
 		<li>This slides on <a href="https://github.com/skozina/cda-slides">github.com</a>.</li>
 	</ul>
-</div> 
+</div>
 
 <div class="slide">
 	<h1>Q&A</h1>
@@ -164,6 +177,14 @@
 			<li>There may be bugs</li>
 			<li>They might need more details</li>
 		</ul>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
 </div>
 
 </body>
