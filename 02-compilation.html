@@ -208,15 +208,19 @@ Key to Flags:
 <div class="slide">
 <h1>ELF Section Header</h1>
 	<ul>
-		<li><em>.text</em> - Program code</li>
-		<li><em>.data</em> - Global initiatlized variables</li>
-		<li><em>.rodata</em> - String and other constants</li>
-		<li><em>.bss</em> - Global uninitialized data</li>
-		<li><em>.shstrtab</em> - Section names</li>
-		<li><em>.symtab</em> - Symbol table, see nm(1)</li>
-		<li><em>.strtab</em> - Symbol names linked from .symtab</li>
-		<li><em>.rela.text</em> - Relocations in .text</li>
-		<li><em>.eh_frame</em> - Exception header frame, stack unwilding</li>
+		<li>Contains Offset and size of each of the sections</li>
+	</ul>
+	<ul>
+		<li><em>.text</em> &mdash; mdash; Program code</li>
+		<li><em>.data</em> &mdash; mdash; Global initiatlized variables</li>
+		<li><em>.rodata</em> &mdash; mdash; String and other constants</li>
+		<li><em>.bss</em> &mdash; mdash; Global uninitialized data</li>
+		<li><em>.shstrtab</em> &mdash; mdash; Section names</li>
+		<li><em>.symtab</em> &mdash; mdash; Symbol table, see nm(1)</li>
+		<li><em>.strtab</em> &mdash; mdash; Symbol names linked from .symtab</li>
+		<li><em>.rela.text</em> &mdash; mdash; Relocations in .text</li>
+		<li><em>.got</em> &mdash; Offset table of the .data</li>
+		<li><em>.eh_frame</em> &mdash; mdash; Exception header frame, stack unwilding</li>
 	</ul>
 </div>
 
@@ -634,19 +638,63 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>Linking</h1>
+<h1>ELF Program Header</h1>
 <ul>
-	<li>Process of merging sections from source object files into resulting executable segments</li>
-	<li>All symbols need to be resolved at the time</li>
-	<li>The final address doesn't need to be determined in case of dynamic linking</li>
+	<li>Created by linker for the execution of the program</li>
 </ul>
 <pre>
-$ gcc test.o -o test
+$ readelf -l test.o
+
+There are no program headers in this file.
 </pre>
 </div>
 
 <div class="slide">
 <h1>Linking</h1>
+<ul>
+	<li>Process of merging sections from source object files into resulting executable segments</li>
+	<li>All symbols need to be resolved at the time</li>
+	<ul>
+		<li><em>Static</em> linking puts all necessary symbols in the resulting binary</li>
+		<li><em>Dynamic</em> linking calls the dynamic linker to load all the symbols lazily</li>
+	</ul>
+	<li><a href="http://www.cs.stevens.edu/~jschauma/810/elf.html">http://www.cs.stevens.edu/~jschauma/810/elf.html</a></li>
+</ul>
+<pre>
+$ gcc test.o -static -o test
+$ ldd test
+	not a dynamic executable
+$ readelf -r test
+
+Relocation section '.rela.plt' at offset 0x1d8 contains 11 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
+  0000006ca060  000000000025 R_X86_64_IRELATIV                    4927c0
+&hellip;
+$ ls -lh test
+-rwxrwxr-x 1 ersin ersin 893K Feb 28 09:59 test
+</pre>
+<pre>
+$ gcc test.o -o test
+$ ldd test
+	linux-vdso.so.1 (0x00007ffdee749000)
+	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f91fdb4a000)
+	/lib64/ld-linux-x86-64.so.2 (0x000055988c3d3000)
+$ readelf -r test
+
+Relocation section '.rela.dyn' at offset 0x380 contains 2 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000600ff0  000200000006 R_X86_64_GLOB_DAT 0000000000000000 __libc_start_main@GLIBC_2.2.5 + 0
+000000600ff8  000300000006 R_X86_64_GLOB_DAT 0000000000000000 __gmon_start__ + 0
+
+Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
+</pre>
+</div>
+
+<div class="slide">
+<h1>ELF Program Header</h1>
 <pre>
 $ readelf -l test
 
@@ -692,7 +740,23 @@ Program Headers:
 </div>
 
 <div class="slide">
-<h1>Linking</h1>
+<h1>ELF Program Header</h1>
+	<ul>
+		<li>Contains Permissions, Offset and size of each of the segments</li>
+	</ul>
+	<ul>
+		<li><em>INTERP</em> &mdash; Path to the dynamic interpreter, ld-linux-x86_64.so</li>
+		<li><em>LOAD</em> &mdash; Only this segment is actually loaded in the memory</li>
+		<li><em>DYNAMIC</em> &mdash; The list of required libraries</li>
+		<li><em>NOTE</em> &mdash; Other notes eg. about the reason for the core dump</li>
+		<li><em>GNU_EH_FRAME</em> &mdash; .eh_frame_hdr, stack frames</li>
+		<li><em>GNU_STACK</em> &mdash; Non-executable stack</li>
+		<li><em>GNU_RELRO</em> &mdash; Read-only data after relocation, .got</li>
+	</ul>
+</div>
+
+<div class="slide">
+<h1>Dynamic Linking</h1>
 <pre>
 $ readelf -l test
 
@@ -738,7 +802,7 @@ Program Headers:
 </div>
 
 <div class="slide">
-<h1>Linking</h1>
+<h1>Dynamic Linking</h1>
 <pre>
 $ nm test
 ...
@@ -767,6 +831,95 @@ Dump of assembler code for function _start:
 &lt;+29&gt;:	mov    $0x400526,%rdi
 &lt;+36&gt;:	callq  0x400410 &lt;__libc_start_main@plt&gt;
 &lt;+41&gt;:	hlt
+</pre>
+</div>
+
+<div class="slide">
+<h1>Dynamic Linking</h1>
+<ul>
+	<li>The kerner does:</li>
+	<ul>
+		<li>Maps the LOAD segments in the memory</li>
+		<li>Zeros out the NOBITS sections, eg. .bss</li>
+		<li>Examine if there's INTERP segment</li>
+		<ul>
+		<li>If yes it maps this binary in the memory as well</li>
+		</ul>
+		<li>Creates a new process with given start address</li>
+	</ul>
+	<li>The dynamic linker does:</li>
+	<ul>
+		<li>Load in all binaries listed in the DYNAMIC segment</li>
+		<li>Repeat previous step recursively</li>
+		<li>Handles GNU_* segments</li>
+	</ul>
+</div>
+
+<div class="slide">
+<h1>Dynamic Linking</h1>
+<pre>
+$ gdb ./test 
+&hellip;
+(gdb) set disable-randomization off
+(gdb) b main
+Breakpoint 1 at 0x40057f: file test.c, line 12.
+(gdb) run
+Starting program: /home/ersin/temp/test 
+
+Breakpoint 1, main (argc=1, argv=0x7ffc13a39c88) at test.c:12
+12		print_sum(5,4);
+
+$ pmap $(pgrep test)
+25764:   /home/ersin/temp/test
+0000000000400000      4K r-x-- test
+0000000000600000      4K r---- test
+0000000000601000      4K rw--- test
+00007f23203f7000   1780K r-x-- libc-2.24.so
+00007f23205b4000   2044K ----- libc-2.24.so
+00007f23207b3000     16K r---- libc-2.24.so
+00007f23207b7000      8K rw--- libc-2.24.so
+00007f23207b9000     16K rw---   [ anon ]
+00007f23207bd000    148K r-x-- ld-2.24.so
+00007f23209bd000      8K rw---   [ anon ]
+00007f23209e0000      8K rw---   [ anon ]
+00007f23209e2000      4K r---- ld-2.24.so
+00007f23209e3000      4K rw--- ld-2.24.so
+00007f23209e4000      4K rw---   [ anon ]
+00007ffc13a1a000    132K rw---   [ stack ]
+00007ffc13bf4000      8K r----   [ anon ]
+00007ffc13bf6000      8K r-x--   [ anon ]
+ffffffffff600000      4K r-x--   [ anon ]
+ total             4204K
+</pre>
+</div>
+
+<div class="slide">
+<h1>Address Space Layout Randomization (ASLR)</h1>
+<ul>
+	<li>The layout can be randomized by returning random pages from the mmap(2) and brk(2) calls</li>
+	<li>This causes all libraries, stack and heap to be loaded at random offsets</li>
+	<li>Enabled by the kernel</li>
+	<ul>
+		<li>echo 2 &gt; /proc/sys/kernel/randomize_va_space</li>
+	</ul>
+	<li>gdb disables ASLR by default</li>
+	<ul>
+		<li>set disable-randomization off</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Address Space Layout Randomization (ASLR)</h1>
+<pre>
+$ ldd test
+	linux-vdso.so.1 (0x00007ffc26fa2000)
+	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007ff3a84d4000)
+	/lib64/ld-linux-x86-64.so.2 (0x000055999fd80000)
+$ ldd test
+	linux-vdso.so.1 (0x00007fffaeb01000)
+	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007fd994ea9000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000564ea734c000)
 </pre>
 </div>
 
@@ -801,6 +954,29 @@ SECTIONS
 </div>
 
 <div class="slide">
+<h1>Running code</h1>
+<ul>
+	<li>The kernel executes the program interpret, dynamic linker</li>
+	<li>Dynamic linker loads all required libraries (from <em>.dynamic</em> section)</li>
+	<li>On function execution it fills the function pointer to the <em>.got.plt</em> section</li>
+</ul>
+<pre>
+$ readelf -d test
+
+Dynamic section at offset 0xe28 contains 24 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+&hellip;
+</pre>
+<pre>
+$ ldd test
+	linux-vdso.so.1 (0x00007ffd8638f000)
+	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f2d1e019000)
+	/lib64/ld-linux-x86-64.so.2 (0x0000563858ee0000)
+</pre>
+</div>
+
+<div class="slide">
 <h1>Dynamic relocations example</h1>
 <p>
 <a href="https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html">https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html</a>
@@ -825,36 +1001,22 @@ Dump of assembler code for function printf@plt:
    0x4003f6:	jmpq   *0x200c14(%rip)        # 0x601010
 </pre>
 <pre>
+$ readelf -r test
+&hellip;
+Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
+
 $ readelf -S test
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
 &hellip;
   [12] .plt              PROGBITS         00000000004003f0  000003f0
        0000000000000030  0000000000000010  AX       0     0     16
 &hellip;
   [25] .got.plt          PROGBITS         0000000000601000  00001000
        0000000000000028  0000000000000008  WA       0     0     8
-</pre>
-</div>
-
-<div class="slide">
-<h1>Running code</h1>
-<ul>
-	<li>The kernel executes the program interpret, dynamic linker</li>
-	<li>Dynamic linker loads all required libraries (from <em>.dynamic</em>section)</li>
-	<li>On function execution it fills the function pointer to the <em>.got.plt</em> section</li>
-</ul>
-<pre>
-$ readelf -d test
-
-Dynamic section at offset 0xe28 contains 24 entries:
-  Tag        Type                         Name/Value
- 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
-&hellip;
-</pre>
-<pre>
-[ersin@skozina-pc temp]$ ldd test
-	linux-vdso.so.1 (0x00007ffd8638f000)
-	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f2d1e019000)
-	/lib64/ld-linux-x86-64.so.2 (0x0000563858ee0000)
 </pre>
 </div>
 
