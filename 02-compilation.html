@@ -948,8 +948,8 @@ SECTIONS
 	<li>Program which the kernel executes <em>instead</em> of our code</li>
 	<li>Loads dynamic libraries and maps them in our virtual address space</li>
 	<li>Takes care of dynamic relocations of data (section <em>.rela.dyn</em>) and functions (section <em>.rela.plt</em>)</li>
-	<li>The real code then access shared data indirectly through <em>.rela.dyn</em> or <em>.rela.plt</em></li>
-	<li>Actually, before the first call even this links point to a stub functions for <em>lazy binding</em></li>
+	<li>The real code then accesses shared data indirectly through <em>.rela.dyn</em> or <em>.rela.plt</em></li>
+	<li>Actually, before the first call even this points to a stub functions for <em>lazy binding</em></li>
 </ul>
 </div>
 
