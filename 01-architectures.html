@@ -426,6 +426,21 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
+<h1>Segment Descriptor cont.</h1>
+<ul>
+	<li>Special type of the segment descriptor is the <em>Task State Segment (TSS)</em></li>
+	<li>Originally TSS was meant for hardware assisted task switching</em></li>
+	<ul>
+		<li>Which is not supported in 64-bit mode any more</li>
+	</ul>
+	<li>But is also used for setting the %rsp for switching between the privilege levels</li>
+	<ul>
+		<li>On interrupt the %rsp is loaded from the TSS</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
 <h1>Flags and features register</h1>
 <ul>
 	<li>64-bit %rflags</li>
@@ -1081,6 +1096,17 @@ bar:
 		<li><em>push</em> instruction first decrements %rsp, then stores the value</li>
 	</ul>
 	<li>(%rbp + 8) is required to be 16-bytes aligned by ABI</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Multiple stacks</h1>
+<ul>
+	<li>On privilege level switch the new stack is loaded from TSS</li>
+	<li>Kernel has its own stack</li>
+	<li>Old register content is stored on the old stack, then $rsp is loaded from TSS</li>
+	<li>Privilege level switch can happen on interrupt, trap (syscall), fault (GPF) or abort</li>
+	<li>Faults and aborts can be nested, this creates additional stack frame on the kernel stack</li>
 </ul>
 </div>
 
