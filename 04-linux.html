@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Linux crash dump analysis</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>Introduction to Linux kernel</h2>
+ <p>Stanislav Kozina<br>
+ Associate Manager, Software Engineering, Red Hat<br>
+ &copy; January 2018</p>
+ </div>
+</div>
+
+<div class="slide">
+	<h1>Agenda</h1>
+	<ul>
+		<li>Process and memory management</li>
+		<li>task_struct</li>
+		<li>SLAB allocator</li>
+		<li>spinlock, mutex, rwlock, RCU</li>
+	</ul>
+</div>
+
+<div class="slide">
+	<h1>Process Management</h1>
+	<img alt="Process State diagram" src="images/process_states.png" width="40%"/>
+	<p class="grey">Source: https://www.cnblogs.com/xiaojiang1025</p>
+</div>	
+
+<div class="slide">
+<h1>Functions and places</h1>
+<ul>
+	<li>For task-&gt;state look at <em>include/linux/sched.h</em></li>
+	<li>prepare_to_wait, schedule, schedule_timeout</li>
+	<li>wake_up</li>
+	<li>struct wake_queue_head_t</li>
+</ul>
+</div>
+
+</body>
+</html>
