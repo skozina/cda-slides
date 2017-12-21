@@ -51,12 +51,66 @@
 </div>	
 
 <div class="slide">
-<h1>Functions and places</h1>
+<h1>Process Management cont.</h1>
 <ul>
 	<li>For task-&gt;state look at <em>include/linux/sched.h</em></li>
+	<li><em>struct task_struct</em> in <em>include/linux/sched.h</em></li>
 	<li>prepare_to_wait, schedule, schedule_timeout</li>
 	<li>wake_up</li>
 	<li>struct wake_queue_head_t</li>
+	<li>No Conditional Variables</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Memory management</h1>
+<ul>
+	<li><em>struct page</em> to represent single page of physical memory (include/linux/mm_types.h)</li>
+	<li>Pages are organized in <em>struct zone</em> (include/linux/mmzone.h)</li>
+	<li>Pages are allocated through buddy allocator</li>
+	<li>/proc/buddyinfo</li>
+	<li>Accessible via <em>alloc_pages</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>SLAB</h1>
+<ul>
+	<li>Efficient way to build malloc() interface on top of page alloctor</li>
+	<li><em>Slabs</em> are continuous large chunks of memory</li>
+	<li><em>Slab cache</em> is an allocation bitmap of blocks of given size using slab</li>
+	<li>Slab cache can be created using <em>kmem_cache_create</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Memory management</h1>
+<ul>
+	<li>Standard SLAB allocator accessed via <em>kmalloc</em></li>
+	<li>kmalloc is always physically continuous, limited size of single allocation</li>
+	<li><em>vmalloc</em> allocates in virtual memory, not limited, not continuous, but slower</li>
+	<li>kmalloc flags</li>
+	<ul>
+		<li><em>GFP_NOWAIT</em> &mdash; Can't sleep</li>
+		<li><em>GFP_ATOMIC</em> &mdash; for interrupt handlers, always succeeeds</li>
+		<li>include/linux/gfp.h</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Locks</h1>
+<ul>
+	<li><em>spin_lock</em> for short critical sections</li>
+	<ul>
+		<li>Preemption disabled!</li>
+		<li>IRQs still enabled</li>
+		<li>Can't sleep</li>
+	</ul>
+	<li><em>spin_lock_irq/spin_lock_irqsave</em> disables interrupts</li>
+	<li><em>spin_lock_bh</em> disables softirqs</li>
+	<li><em>mutex_lock</em> and <em>mutex_unlock</em></li>
+	<li><em>rwlock_t</em> with read_lock() and write_lock()</li>
 </ul>
 </div>
 
