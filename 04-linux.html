@@ -42,6 +42,7 @@
 		<li>SLAB allocator</li>
 		<li>spinlock, mutex, rwlock, RCU</li>
 	</ul>
+	<p>There are great sources at <a href="https://notes.shichao.io/lkd/ch8/">https://notes.shichao.io/lkd/ch8/</a></p>
 </div>
 
 <div class="slide">
@@ -89,6 +90,9 @@
 	<li>Standard SLAB allocator accessed via <em>kmalloc</em></li>
 	<li>kmalloc is always physically continuous, limited size of single allocation</li>
 	<li><em>vmalloc</em> allocates in virtual memory, not limited, not continuous, but slower</li>
+	<ul>
+		<li>Thus used only for large chunks of memory not used for DMA</li>
+	</ul>
 	<li>kmalloc flags</li>
 	<ul>
 		<li><em>GFP_NOWAIT</em> &mdash; Can't sleep</li>
@@ -111,6 +115,41 @@
 	<li><em>spin_lock_bh</em> disables softirqs</li>
 	<li><em>mutex_lock</em> and <em>mutex_unlock</em></li>
 	<li><em>rwlock_t</em> with read_lock() and write_lock()</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Interrupts</h1>
+<ul>
+	<li><em>Interrupt</em> causes CPU to trap</li>
+	<li>On x86 interrupt is handled according to the <em>Interrupt Descriptor Table</em> (IDT)</li>
+	<li>256 interrupt vectors, only 32-127 can be used for IRQs</li>
+	<li>IRQ is device <em>Interrupt Request</em></li>
+	<li>IRQs can be masked with CLI instruction, but some interrupts not (traps, NMIs)</li>
+	<li>/proc/interrupts</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>IRQ handling</h1>
+<ul>
+	<li>Split between:</li>
+	<ul>
+		<li>Top half running in the interrupt context, interrupts disabled</li>
+		<li>Bottom half scheduled for later, interrupts enabled</li>
+	</ul>
+	<li>IRQ handler registered via request_irq()</li>
+	<li>Bottom halves are implemented via softirqs</li>
+	<li><em>tasklets</em> are built on top of softirqs</li>
+	<ul>
+		<li>only single tasklet of given type can run at a time</li>
+	</ul>
+	<li>softirqs are execute from various places using do_softirq()</li>
+	<li><em>Work queues</em> can be used to postpone workload to a process</li>
+	<ul>
+		<li>Used when the work needs to sleep</li>
+	</ul>
+	<li>Bottom halves can be disabled using local_bh_disable()</li>
 </ul>
 </div>
 
