@@ -327,7 +327,7 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-<h1>Memory Management</h1>
+<h1>x86 Memory Management</h1>
 <ul>
 	<li>All instructions operate on <em>Virtual Memory</em></li>
 	<ul>
@@ -352,7 +352,34 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-<h1>Memory Management (cont.)</h1>
+<h1>Real Mode (8086) Segmentation</h1>
+<ul>
+	<li>16 bit registers, 20bit addressing</li>
+	<li>Segment registers CS, DS, ES, ES</li>
+	<li>16 bit segment, 16 bit offset</li>
+	<li>20 bit address = segment &lt;&lt; 4 + offset</li>
+	<li>4096 combinations to compute the same physical address</li>
+</ul>
+<table border="1">
+	<tr>
+		<td>0010</td>
+		<td>1010</td>
+		<td>0010</td>
+		<td>1000</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td>0010</td>
+		<td>1010</td>
+		<td>1000</td>
+		<td>0010</td>
+	</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>Protected Mode (80286) Memory Management</h1>
 <img height=70% alt="x86 VMM" src="images/x86-vmm.png"/>
 <p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
 </div>
