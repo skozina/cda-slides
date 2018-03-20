@@ -383,9 +383,19 @@ CR2: 0000000000000000
 <ul>
 	<li>Several operations can be done through a magic key</li>
 	<ul>
-		<li>Panic, reboot, sync fs, dump processes, SIGINT/SIGKILL processes</li>
+		<li>Loglevel, panic/crash, reboot, sync fs, dump processes, SIGINT/SIGKILL processes, memory information, pending timers, etc...</li>
+		<li>Prints to kernel log (dmesg)</li>
 	</ul>
 	<li>Can be also activated by writing to <em>/proc/sysrq-trigger</em></li>
+	<li>H - shows full help</li>
+<pre>
+sysrq: SysRq : HELP : loglevel(0-9) reboot(b) crash(c) terminate-all-tasks(e)
+ memory-full-oom-kill(f) kill-all-tasks(i) thaw-filesystems(j) sak(k)
+ show-backtrace-all-active-cpus(l) show-memory-usage(m) nice-all-RT-tasks(n)
+ poweroff(o) show-registers(p) show-all-timers(q) unraw(r) sync(s)
+ show-task-states(t) unmount(u) force-fb(V) show-blocked-tasks(w)
+ dump-ftrace-buffer(z)
+</pre>
 </ul>
 </div>
 
@@ -498,14 +508,21 @@ LOAD AVERAGE: 0.21, 0.07, 0.02
 <ul>
 	<li>help &mdash; prints list of all commands</li>
 	<li>mod -S &mdash; load debug information for all loaded modules</li>
+	<li>sym {-l | -m &lt;module&gt; | &lt;address&gt;} &mdash; symbol details</li>
 	<li>set hex &mdash; set crash output to hex</li>
 	<ul>
 		<li>Doesn't change the gdb output base;-/</li>
 	</ul>
-	<li>sys &mdash; basic system information</li>
+	<li>sys &mdash; basic OS system information, sys -i &mdash; DMI system information from BIOS (x86)</li>
 	<li>mach [-m|-c] &mdash; machine specific information</li>
-	<li>dev &mdash; character and block devices</li>
+	<li>dev &mdash; character and block devices, dev -d &mdash; block layer and driver I/O queues</li>
+	<li>timer [-r] &mdash; pending [high resolution] timers details</li>
+	<li>files -d &lt;dentry&gt; &mdash; details about any given file</li>
 	<li>net &mdash; network devices</li>
+	<li>rd/wr &mdash; read/write (on live system) data from memory</li>
+	<li>p &mdash; evaluate an expression (for example print a value of some symbol)</li>
+	<li>foreach ... &lt;cmd&gt; &mdash; execute a command on a selected group of tasks</li>
+	<li>dis [-l|-r] {&lt;address&gt; | symbol} &mdash; disassemble machine code</li>
 	<li>log &mdash; system log buffer</li>
 </ul>
 </div>
@@ -513,13 +530,20 @@ LOAD AVERAGE: 0.21, 0.07, 0.02
 <div class="slide">
 <h1>Process related stuff</h1>
 <ul>
-	<li>ps &mdash; process listing</li>
+	<li>ps [-p | -c | -m | -t] &mdash; process listing (parents, childs, timestamps...)</li>
 	<li>runq &mdash; runqueue listing</li>
-	<li>bt &mdash; print stack</li>
+	<li>bt [-s] &mdash; print stack</li>
 	<ul>
+		<li>bt -S &lt;stack_address&gt; &mdash; start unrolling at given top</li>
+		<li>bt {-f | [-F[F]]} &mdash; print the raw content of the stack frame, [resolve slab cache objects]</li>
+		<li>bt -r &mdash; dump raw stack memory</li>
+		<li>bt -c &lt;cpu_number&gt; &mdash; backtrace task running on given cpu</li>
 		<li>bt -a &mdash; print stack for all cpus</li>
-		<li>bt -f &mdash; print the raw content of the stack frame</li>
+		<li>bt -e &mdash; search for and dump exception frames on stack</li>
+		<li>bt -E &mdash; dump exceptin frames on NMI/IRQ/double fault/debug stacks</li>
 	</ul>
+	<li>files &mdash; open file descriptors details</li>
+	<li>net -s &mdash; open sockets details</li>
 	<li>vm &mdash; prints memory areas of given task</li>
 </ul>
 </div>
@@ -527,7 +551,14 @@ LOAD AVERAGE: 0.21, 0.07, 0.02
 <div class="slide">
 <h1>Memory related stuff</h1>
 <ul>
-	<li>kmem</li>
+	<li>kmem &lt;address&gt; &mdash; detailed information about given memory (if valid/available)</li>
+	<ul>
+		<li>kmem -i &mdash; system memory summary (total, free, available, slab, cache/buffers, swap)</li>
+		<li>kmem -s [&lt;object&gt;] &mdash; SLAB cache dump/details</li>
+		<li>kmem -p [&lt;phys | page&gt;] &mdash; details about physical page frame</li>
+		<li>kmem -n &mdash; NUMA related details</li>
+		<li>kmem -z &mdash; memory zones details</li>
+	</ul>
 </ul>
 </div>
 
