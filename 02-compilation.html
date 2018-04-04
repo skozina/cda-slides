@@ -739,6 +739,23 @@ Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
 </div>
 
 <div class="slide">
+<h1>R_X86_64_IRELATIV relocations</h1>
+<ul>
+	<li>R_X86_64_IRELATIV are used by libc to optimize versions of used functions</li>
+	<ul>
+		<li>These are not resolved by linker, but libc itself in <em>__libc_start_main</em></li>
+	</ul>
+	<li>Offset points to the place in .got which is used for give function, eg. <em>strcpy()</em></li>
+	<li>Sym. Name + Addend is the offset to libc pointing to a function which returns pointer to the right version of strcpy, eg. <em>__strcpy_sse2__unaligned</em></li>
+	<li>Resolver name function is eg. __strcpy_ifunc</li>
+</ul>
+<pre>
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
+</pre>
+</div>
+
+<div class="slide">
 <h1>ELF Program Header</h1>
 <pre>
 $ readelf -l test
