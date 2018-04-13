@@ -245,6 +245,38 @@ You can now use it in all perf tools, such as:
 </pre>
 </div>
 
+<div class="slide">
+<h1>eBPF</h1>
+<ul>
+	<li>Extension of traditional Berkley Packet Filter (bpf)</li>
+	<ul>
+		<li>bpf allows network filtering in kernel for specific packets<li>
+		<li>The criteria are passed from userland in form of program written in bytecode using special instructions</li>
+		<li>bpf is used by tcpdump/libpcap</li>
+		<li>Accessible via setsockopt(SO_ATTACH_FILTER)</li>
+		<li>The bytecode can be JIT compiled so processing is fast</li>
+	</ul>
+	<li>eBPF extends the machine by providing more registers and more memory for interim operations (4096 bytes)</li>
+	<li>Accesible via new syscall bpf(2)<li>
+	<li>The bytecode is verified by the kernel for safety</li>
+	<ul>
+		<li>Eg. it has to finish -- no loops!</li>
+	</ul>
+	<li>Introduces eBPF maps for storing and passing data between kernel and userland</li>
+	<li>Also allows calling of few selected kernel functions</li>
+	<ul>
+		<li>such as register_kprobes()</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>eBPF</h1>
+<ul>
+
+</ul>
+</div>
+
 <div class="slide cover">
  <div>
  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
