@@ -996,6 +996,7 @@ $ ldd test
 	<li>-fpie is similar to -fpic. -pie tells linker to enable ASLR for .text and .data</li>
 	<li>-pie causes ELF type to switch from EXEC (executable) to DYN (shared object file)</li>
 	<li>Link address is set to 0 (determined by dynamic interpret)</li>
+	<li>The dynamic interpret distinguishes libraries and executables based on INTERP segment</li>
 </ul>
 <pre>
 $ (sleep 1;)&amp; pmap $(pgrep sleep) | head -n 4
