@@ -986,6 +986,38 @@ $ ldd test
 </div>
 
 <div class="slide">
+<h1>Position Independent Executable (PIE)</h1>
+<ul>
+	<li>Like -fPIC, ie. use %rip for relative offset addressing</li>
+	<li>Also tell linker to make .text, .data and .rodata located randomly</li>
+	<ul>
+		<li>So ASLR works for .text, .data and .rodata</li>
+	</ul>
+	<li>-fpie is similar to -fpic. -pie tells linker to enable ASLR for .text and .data</li>
+	<li>-pie causes ELF type to switch from EXEC (executable) to DYN (shared object file)</li>
+	<li>Link address is set to 0 (determined by dynamic interpret)</li>
+</ul>
+<pre>
+$ (sleep 1;)&amp; pmap $(pgrep sleep) | head -n 4
+0000564d20762000     28K r-x-- sleep
+0000564d20969000      4K r---- sleep
+0000564d2096a000      4K rw--- sleep
+$ (sleep 1;)&amp; pmap $(pgrep sleep) | head -n 4
+00005613f7b66000     28K r-x-- sleep
+00005613f7d6d000      4K r---- sleep
+00005613f7d6e000      4K rw--- sleep
+$ readelf -h /bin/sleep | grep Type
+  Type:                              DYN (Shared object file)
+$ readelf -l /bin/sleep
+&hellip;
+  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000006c48 0x0000000000006c48  R E    0x200000
+  LOAD           0x0000000000007b10 0x0000000000207b10 0x0000000000207b10
+                 0x0000000000000570 0x00000000000006f0  RW     0x200000
+</pre>
+</div>
+
+<div class="slide">
 <h1>Linker script</h1>
 <ul>
 	<li>Describes how sections should be linked to segments</li>
