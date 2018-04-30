@@ -703,7 +703,7 @@ There are no program headers in this file.
 		<li><em>Static</em> linking puts all necessary symbols in the resulting binary</li>
 		<li><em>Dynamic</em> linking calls the dynamic linker to load all the symbols lazily</li>
 	</ul>
-	<li><a href="http://www.cs.stevens.edu/~jschauma/810/elf.html">http://www.cs.stevens.edu/~jschauma/810/elf.html</a></li>
+	<li><a href="https://www.cs.stevens.edu/~jschauma/631A/elf.html">https://www.cs.stevens.edu/~jschauma/631A/elf.html</a></li>
 </ul>
 <pre>
 $ gcc test.o -static -o test
@@ -909,7 +909,7 @@ Dump of assembler code for function _start:
 		</ul>
 		<li>Creates a new process with given start address</li>
 	</ul>
-	<li>The dynamic linker^Winterpret does:</li>
+	<li>The dynamic interpret does:</li>
 	<ul>
 		<li>Load in all binaries listed in the DYNAMIC segment</li>
 		<li>Repeat previous step recursively</li>
@@ -1038,7 +1038,7 @@ SECTIONS
 </div>
 
 <div class="slide">
-<h1>Dynamic linker^Winterpret</h1>
+<h1>Dynamic interpret</h1>
 <ul>
 	<li>Program which the kernel executes <em>instead</em> of our code</li>
 	<li>Loads dynamic libraries and maps them in our virtual address space</li>
@@ -1051,7 +1051,7 @@ SECTIONS
 <div class="slide">
 <h1>Running code</h1>
 <ul>
-	<li>The kernel executes the program interpret, dynamic linker^Winterpret</li>
+	<li>The kernel executes the program interpret, aka. dynamic interpret</li>
 	<li>Dynamic linker loads all required libraries (from <em>.dynamic</em> section)</li>
 	<li>On function execution it fills the function pointer to the <em>.got.plt</em> section</li>
 </ul>
