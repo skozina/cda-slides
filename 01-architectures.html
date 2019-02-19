@@ -355,7 +355,7 @@ int a = 0x12345678;
 <h1>Real Mode (8086) Segmentation</h1>
 <ul>
 	<li>16 bit registers, 20bit addressing</li>
-	<li>Segment registers CS, DS, ES, ES</li>
+	<li>Segment registers CS, DS, ES, GS</li>
 	<li>16 bit segment, 16 bit offset</li>
 	<li>20 bit address = segment &lt;&lt; 4 + offset</li>
 	<li>4096 combinations to compute the same physical address</li>
@@ -446,10 +446,29 @@ int a = 0x12345678;
 		<li>%cs, %ds, %ss, %es base considered zero</li>
 		<li>No limit checking</li>
 		<li>But %fs and %gs are usable!</li>
+		<ul>
+			<li>Used to access per-cpu data</li>
+		</ul>
 	</ul>
 </ul>
 <img height=30% alt="Segment Descriptor" src="images/segment_descriptor.png"/>
 <p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-8</p>
+</div>
+
+<div class="slide">
+<h1>Per CPU data</h1>
+<pre>
+asmlinkage __visible void __sched schedule(void)
+{
+	struct task_struct *tsk = current;
+&hellip;
+</pre>
+<pre>
+crash&gt; dis schedule
+0xffffffffb3009b30 &lt;schedule&gt;:  nopl   0x0(%rax,%rax,1) [FTRACE NOP]
+0xffffffffb3009b35 &lt;schedule+5&gt;:        mov    %gs:0x15b80,%rax
+&hellip;
+</pre>
 </div>
 
 <div class="slide">
@@ -1134,6 +1153,36 @@ bar:
 	<li>Old register content is stored on the old stack, then $rsp is loaded from TSS</li>
 	<li>Privilege level switch can happen on interrupt, trap (syscall), fault (GPF) or abort</li>
 	<li>Faults and aborts can be nested, this creates additional stack frame on the kernel stack</li>
+</ul>
+</div>
+
+<div class="slide cover">
+ <br clear="all" />
+ <h1>ppc64</h1>
+</div>
+
+<div class="slide">
+<h1>Registers</h1>
+<ul>
+	<li>32 General Purpose Registers (<em>GPRs</em>)</li>
+	<ul>
+		<li>GPR0 for syscall number</li>
+		<li>GPR1 is stack pointer</li>
+		<li>GPR2 is pointer to Table Of Contents (TOC)</li>
+		<li>GPR3..GPR10 function arguments (all volatile)</li>
+		<li>GPR14..GPR31 non volatile</li>
+	</ul>
+	<li>Conditional Register (<em>CR</em>) &mdash; set of 8 4-bit status registers</li>
+	<li>Link Register (<em>LR</em>) and Count Register (<em>CTR</em>) for conditional branches</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Load/Store</h1>
+<ul>
+	<li><em>lw/ld</em>&mdash; Load word/double word</li>
+	<li><em>li/lis</em>&mdash; Load immediate (shifted by 16 bits). Clears upper/lower 16 bits.</li>
+	<li><em>stw/std</em>&mdash; Store word/double word</li>
 </ul>
 </div>
 
