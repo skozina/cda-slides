@@ -1166,14 +1166,24 @@ bar:
 <ul>
 	<li>32 General Purpose Registers (<em>GPRs</em>)</li>
 	<ul>
-		<li>GPR0 for syscall number</li>
-		<li>GPR1 is stack pointer</li>
-		<li>GPR2 is pointer to Table Of Contents (TOC)</li>
-		<li>GPR3..GPR10 function arguments (all volatile)</li>
-		<li>GPR14..GPR31 non volatile</li>
+		<li>GPR0 &mdash; for syscall number, reserved</li>
+		<li>GPR1 &mdash; stack pointer</li>
+		<li>GPR2 &mdash; pointer to Table Of Contents (TOC)</li>
+		<li>GPR3..GPR10 &mdash; function arguments (all volatile)</li>
+		<li>GPR3 &mdash; return value (volatile)</li>
+		<li>GPR14..GPR31 &mdash; non volatile</li>
+		<li>(optional) GPR31 &mdash; frame pointer</li>
 	</ul>
-	<li>Conditional Register (<em>CR</em>) &mdash; set of 8 4-bit status registers</li>
-	<li>Link Register (<em>LR</em>) and Count Register (<em>CTR</em>) for conditional branches</li>
+	<li>Conditional Register (<em>CR</em>) &mdash; set of 8 4-bit status registers.</li>
+	<li>Count Register (<em>CTR</em>) for loop iteration counts.</li>
+	<li>Link Register (<em>LR</em>) for last return address to speed up leaf calls.</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Move</h1>
+<ul>
+	<li><em>mr</em>&mdash; Move to Register</li>
 </ul>
 </div>
 
@@ -1183,6 +1193,17 @@ bar:
 	<li><em>lw/ld</em>&mdash; Load word/double word</li>
 	<li><em>li/lis</em>&mdash; Load immediate (shifted by 16 bits). Clears upper/lower 16 bits.</li>
 	<li><em>stw/std</em>&mdash; Store word/double word</li>
+	<li><em>stwu/stdu</em>&mdash; Store word/double word and update register with target address</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Link Register</h1>
+<ul>
+	<li><em>mflr</em>&mdash; Move from link register.</li>
+	<li><em>mtlr</em>&mdash; Move to link register.</li>
+	<li><em>bl</em>&mdash; Branch and store return value to LR.</li>
+	<li><em>blr</em>&mdash; Return to LR.</li>
 </ul>
 </div>
 
