@@ -143,6 +143,9 @@ static int __init kprobe_init(void)
 # stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s\n", ppfunc()); }'
 -&gt; icmpv6_rcv
 -&gt; icmpv6_rcv
+# stap -v -e 'probe kernel.function("icmp_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), ulong_arg(1)); }'
+-&gt; icmp_rcv(0xffff8f2316224200)
+-&gt; icmp_rcv(0xffff8f2316224700)
 </pre>
 </div>
 
@@ -178,7 +181,9 @@ WARNING: function icmpv6_init is in blacklisted section: keyword at trace.stap:1
 <div class="slide">
 <h1>ftrace</h1>
 <ul>
-	<li>Allows attaching to tracepoints and kprobes via debugfs</li>
+	<li>Trace interface for set of given tracepoints</li>
+	<li>Allows creating dynamic tracepoints via kprobes</li>
+	<li>Accessible via debugfs</li>
 	<li>Ftrace can also generate call graphs by attached to all kprobes</li>
 	<li>Read <em>Documentation/trace/ftrace.txt</em> and <em>Documentation/trace/kprobetrace.txt</em></li>
 </ul>
@@ -201,6 +206,25 @@ WARNING: function icmpv6_init is in blacklisted section: keyword at trace.stap:1
   0) + 13.812 us   |      icmpv6_push_pending_frames();
   0) + 22.602 us   |    }
   0) + 23.791 us   |  }
+</pre>
+</div>
+
+<div class="slide">
+<h1>trace-cmd</h1>
+<ul>
+	<li>Tool for easier interface to ftrace</li>
+</ul>
+<pre>
+# trace-cmd record -p function -l 'icmp_rcv'
+# trace-cmd report
+CPU 1 is empty
+CPU 2 is empty
+CPU 3 is empty
+cpus=4
+ irq/135-iwlwifi-921   [000] 26996.738342: function:             icmp_rcv
+</pre>
+<pre>
+trace-cmd record -p function_graph -l 'tcp_*'
 </pre>
 </div>
 
@@ -547,7 +571,7 @@ Tracing... Hit Ctrl-C to end.
 </div>
 
 <div class="slide">
-<h1>High level eBPF language: ply &amp; bpftrace</h1>
+<h1>High level eBPF language: ply</h1>
 <ul>
 	<li>Arguments</li>
 </ul>
@@ -587,18 +611,28 @@ icmp_rcv(0xffff95333d4fb400)
 	[ 16k,  32k)	       0 ┤                                │
 	[ 32k,  64k)	       5 ┤▊                               │
 </pre>
+</div>
 
-<ul>
-	<li>bpftrace</li>
-</ul>
+<div class="slide">
+<h1>High level eBPF language: bpftrace</h1>
 <pre>
-# build-release/src/bpftrace -e 'kprobe:SyS_* { @[func] = count() }'
+# bpftrace -e 'kprobe:__x64_sys_* { @[func] = count() }'
 
 Attaching 342 probes...
 &hellip;
-@[sys_writev]: 3240
-@[sys_poll]: 3782
-@[sys_recvmsg]: 4322
+@[__x64_sys_kill]: 1
+@[__x64_sys_getresuid]: 1
+@[__x64_sys_shutdown]: 1
+</pre>
+<pre>
+# bpftrace -e 'kprobe:icmp_* { printf("%s\n", func); } kprobe:icmp_rcv { printf("%s(%p)\n", func, arg0); }'
+icmp_invert_tuple
+icmp_invert_tuple
+icmp_pkt_to_tuple
+icmp_packet
+icmp_rcv(0xffff8f2303de1b00)
+icmp_rcv(0xffff8f2303de1b00)
+&hellip;
 </pre>
 </div>
 
