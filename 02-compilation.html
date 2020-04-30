@@ -296,51 +296,6 @@ String dump of section '.my_section':
 </div>
 
 <div class="slide">
-<h1>Position Independent Code (PIC)</h1>
-<ul>
-	<li>The code uses %rip instead of constant offsets</li>
-	<li>Thus there's no need for relocations in .text segment</li>
-	<ul>
-		<li>But the architecture must allow reads of %rip</li>
-	</ul>
-	<li>Great advantage for shared libraries</li>
-	<ul>
-		<li>No relocations means that the loading is much faster</li>
-		<li>Also that means that library loaded into different processes can be the same</li>
-		<li>Thus we can really share physical memory for libraries</li>
-	</ul>
-</ul>
-</div>
-
-<div class="slide">
-<h1>Position Independent Code (PIC) cont.</h1>
-<pre>
-int main(int argc, char **argv) {
-	printf("Hello world\n");
-	return 0;
-}
-</pre>
-<pre>
-$ gcc -Wall -o temp temp.c
-$ objdump -d temp | grep -A10 '\&lt;main\&gt;'
-00000000004004d7 &lt;main&gt;:
-&hellip;
-  4004e6:	bf 90 05 40 00       	mov    $0x400590,%edi
-  4004eb:	e8 00 ff ff ff       	callq  4003f0 &lt;puts@plt&gt;
-&hellip;
-</pre>
-<pre>
-$ gcc -fPIC -Wall -o temp temp.c
-$ objdump -d temp | grep -A10 '\&lt;main\&gt;'
-00000000004004d7 &lt;main&gt;:
-&hellip;
-  4004e6:	48 8d 3d a3 00 00 00 	lea    0xa3(%rip),%rdi        # 400590 &lt;__dso_handle+0x8&gt;
-  4004ed:	e8 fe fe ff ff       	callq  4003f0 &lt;puts@plt&gt;
-&hellip;
-</pre>
-</div>
-
-<div class="slide">
 <h1>Compiler optimizations</h1>
 <ul>
 	<li>Compilers try to be smart on many thing:</li>
@@ -956,6 +911,51 @@ ffffffffff600000      4K r-x--   [ anon ]
 </div>
 
 <div class="slide">
+<h1>Position Independent Code (PIC)</h1>
+<ul>
+	<li>The code uses %rip instead of constant offsets</li>
+	<li>Thus there's no need for relocations in .text segment</li>
+	<ul>
+		<li>But the architecture must allow reads of %rip</li>
+	</ul>
+	<li>Great advantage for shared libraries</li>
+	<ul>
+		<li>No relocations means that the loading is much faster</li>
+		<li>Also that means that library loaded into different processes can be the same</li>
+		<li>Thus we can really share physical memory for libraries</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Position Independent Code (PIC) cont.</h1>
+<pre>
+int main(int argc, char **argv) {
+	printf("Hello world\n");
+	return 0;
+}
+</pre>
+<pre>
+$ gcc -Wall -o temp temp.c
+$ objdump -d temp | grep -A10 '\&lt;main\&gt;'
+00000000004004d7 &lt;main&gt;:
+&hellip;
+  4004e6:	bf 90 05 40 00       	mov    $0x400590,%edi
+  4004eb:	e8 00 ff ff ff       	callq  4003f0 &lt;puts@plt&gt;
+&hellip;
+</pre>
+<pre>
+$ gcc -fPIC -Wall -o temp temp.c
+$ objdump -d temp | grep -A10 '\&lt;main\&gt;'
+00000000004004d7 &lt;main&gt;:
+&hellip;
+  4004e6:	48 8d 3d a3 00 00 00 	lea    0xa3(%rip),%rdi        # 400590 &lt;__dso_handle+0x8&gt;
+  4004ed:	e8 fe fe ff ff       	callq  4003f0 &lt;puts@plt&gt;
+&hellip;
+</pre>
+</div>
+
+<div class="slide">
 <h1>Address Space Layout Randomization (ASLR)</h1>
 <ul>
 	<li>The layout can be randomized by returning random pages from the mmap(2) and brk(2) calls</li>
@@ -968,6 +968,7 @@ ffffffffff600000      4K r-x--   [ anon ]
 	<ul>
 		<li>set disable-randomization off</li>
 	</ul>
+	<li>Easy for libraries (PIC code), what about binaries?</li>
 </ul>
 </div>
 
@@ -988,7 +989,10 @@ $ ldd test
 <div class="slide">
 <h1>Position Independent Executable (PIE)</h1>
 <ul>
-	<li>Like -fPIC, ie. use %rip for relative offset addressing</li>
+	<li>Like PIC for executable binaries</li>
+	<ul>
+		<li>use %rip for relative offset addressing</li>
+	</ul>
 	<li>Also tell linker to make .text, .data and .rodata located randomly</li>
 	<ul>
 		<li>So ASLR works for .text, .data and .rodata</li>
