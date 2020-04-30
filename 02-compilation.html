@@ -913,7 +913,7 @@ ffffffffff600000      4K r-x--   [ anon ]
 <div class="slide">
 <h1>Position Independent Code (PIC)</h1>
 <ul>
-	<li>The code uses %rip instead of constant offsets</li>
+	<li>The code uses %rip instead of constant offsets, external references via .got/.got.plt</li>
 	<li>Thus there's no need for relocations in .text segment</li>
 	<ul>
 		<li>But the architecture must allow reads of %rip</li>
@@ -924,6 +924,7 @@ ffffffffff600000      4K r-x--   [ anon ]
 		<li>Also that means that library loaded into different processes can be the same</li>
 		<li>Thus we can really share physical memory for libraries</li>
 	</ul>
+	<li>Compiler option -fPIC</li>
 </ul>
 </div>
 
@@ -990,18 +991,19 @@ $ ldd test
 <h1>Position Independent Executable (PIE)</h1>
 <ul>
 	<li>Like PIC for executable binaries</li>
-	<ul>
-		<li>use %rip for relative offset addressing</li>
-	</ul>
-	<li>Also tell linker to make .text, .data and .rodata located randomly</li>
+	<li>Linker can further make .text, .data and .rodata located randomly</li>
 	<ul>
 		<li>So ASLR works for .text, .data and .rodata</li>
+		<li>Linker option -pie tells linker to enable ASLR for .text and .data</li>
 	</ul>
-	<li>-fpie is similar to -fpic. -pie tells linker to enable ASLR for .text and .data</li>
 	<li>-pie causes ELF type to switch from EXEC (executable) to DYN (shared object file)</li>
 	<li>Link address is set to 0 (determined by dynamic interpret)</li>
 	<li>The dynamic interpret distinguishes libraries and executables based on INTERP segment</li>
 </ul>
+</div>
+
+<div class="slide">
+<h1>Position Independent Executable (PIE) cont.</h1>
 <pre>
 $ (sleep 1;)&amp; pmap $(pgrep sleep) | head -n 4
 0000564d20762000     28K r-x-- sleep
