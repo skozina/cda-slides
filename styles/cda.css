@@ -51,6 +51,14 @@ table {
 	table-layout: fixed;
 }
 
+table.border tr td,th {
+	border:0.1em solid black;
+}
+
+table.centered tr td {
+    text-align: center;
+}
+
 table tr.border td {
 	border:0.1em solid black;
 }
