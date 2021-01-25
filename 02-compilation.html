@@ -28,9 +28,11 @@
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
  <h2>Compilation, linking and running code</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
 Manager, Software Engineering, Red Hat<br>
- &copy; January 2016</p>
+ &copy; January 2021</p>
  </div>
 </div>
 
@@ -43,6 +45,11 @@ Manager, Software Engineering, Red Hat<br>
 	<li>Linker script</li>
 	<li>Understanding of the Unix binary file (ELF, objdump)</li>
 </ul>
+</div>
+
+<div class="slide cover">
+ <br clear="all" />
+ <h1>Compilation</h1>
 </div>
 
 <div class="slide">
@@ -637,6 +644,11 @@ Dump of assembler code for function main:
 </table>
 </div>
 
+<div class="slide cover">
+ <br clear="all" />
+ <h1>Linking</h1>
+</div>
+
 <div class="slide">
 <h1>ELF Program Header</h1>
 <ul>
@@ -664,13 +676,6 @@ There are no program headers in this file.
 $ gcc test.o -static -o test
 $ ldd test
 	not a dynamic executable
-$ readelf -r test
-
-Relocation section '.rela.plt' at offset 0x1d8 contains 11 entries:
-  Offset          Info           Type           Sym. Value    Sym. Name + Addend
-  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
-  0000006ca060  000000000025 R_X86_64_IRELATIV                    4927c0
-&hellip;
 $ ls -lh test
 -rwxrwxr-x 1 ersin ersin 893K Feb 28 09:59 test
 </pre>
@@ -680,33 +685,6 @@ $ ldd test
 	linux-vdso.so.1 (0x00007ffdee749000)
 	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f91fdb4a000)
 	/lib64/ld-linux-x86-64.so.2 (0x000055988c3d3000)
-$ readelf -r test
-
-Relocation section '.rela.dyn' at offset 0x380 contains 2 entries:
-  Offset          Info           Type           Sym. Value    Sym. Name + Addend
-000000600ff0  000200000006 R_X86_64_GLOB_DAT 0000000000000000 __libc_start_main@GLIBC_2.2.5 + 0
-000000600ff8  000300000006 R_X86_64_GLOB_DAT 0000000000000000 __gmon_start__ + 0
-
-Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
-  Offset          Info           Type           Sym. Value    Sym. Name + Addend
-000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
-</pre>
-</div>
-
-<div class="slide">
-<h1>R_X86_64_IRELATIV relocations</h1>
-<ul>
-	<li>R_X86_64_IRELATIV are used by libc to optimize versions of used functions</li>
-	<ul>
-		<li>These are not resolved by linker, but libc itself in <em>__libc_start_main</em></li>
-	</ul>
-	<li>Offset points to the place in .got which is used for give function, eg. <em>strcpy()</em></li>
-	<li>Sym. Name + Addend is the offset to libc pointing to a function which returns pointer to the right version of strcpy, eg. <em>__strcpy_sse2__unaligned</em></li>
-	<li>Resolver name function is eg. __strcpy_ifunc</li>
-</ul>
-<pre>
-  Offset          Info           Type           Sym. Value    Sym. Name + Addend
-  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
 </pre>
 </div>
 
@@ -771,6 +749,102 @@ Program Headers:
 		<li><em>GNU_RELRO</em> &mdash; Read-only data after relocation, .got</li>
 	</ul>
 </div>
+
+<div class="slide">
+<h1>Relocations in linked binary</h1>
+	<ul>
+		<li>Static linking</li>
+        <ul>
+            <li>No relocations, except for R_X86_64_IRELATIV</li>
+<pre>
+$ readelf -r test
+Relocation section '.rela.plt' at offset 0x1d8 contains 11 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
+  0000006ca060  000000000025 R_X86_64_IRELATIV                    4927c0
+&hellip;
+</pre>
+        </ul>
+		<li>Dynamic linking</li>
+        <ul>
+            <li>Dynamic relocations of data (section <em>.rela.dyn</em>) and functions (section <em>.rela.plt</em>)</li>
+            <li>Resolved during runtime by dynamic interpreter</li>
+<pre>
+$ readelf -r test
+Relocation section '.rela.dyn' at offset 0x380 contains 2 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000600ff0  000200000006 R_X86_64_GLOB_DAT 0000000000000000 __libc_start_main@GLIBC_2.2.5 + 0
+000000600ff8  000300000006 R_X86_64_GLOB_DAT 0000000000000000 __gmon_start__ + 0
+
+Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
+</pre>
+        </ul>
+	</ul>
+</div>
+
+<div class="slide">
+<h1>R_X86_64_IRELATIV relocations</h1>
+<ul>
+	<li>R_X86_64_IRELATIV are used by libc to optimize versions of used functions</li>
+	<ul>
+		<li>These are not resolved by linker, but libc itself in <em>__libc_start_main</em></li>
+	</ul>
+	<li>Offset points to the place in .got which is used for give function, eg. <em>strcpy()</em></li>
+	<li>Sym. Name + Addend is the offset to libc pointing to a function which returns pointer to the right version of strcpy, eg. <em>__strcpy_sse2__unaligned</em></li>
+	<li>Resolver name function is eg. __strcpy_ifunc</li>
+</ul>
+<pre>
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+  0000006ca068  000000000025 R_X86_64_IRELATIV                    421400
+</pre>
+</div>
+
+<div class="slide">
+<h1>Dynamic relocations example</h1>
+<p>
+<a href="https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html">https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html</a>
+</p>
+<pre>
+(gdb) disassemble main
+Dump of assembler code for function main:
+&hellip;
+&lt;+16&gt;:	callq  0x400400 &lt;printf@plt&gt;
+
+(gdb) disassemble 0x400400
+Dump of assembler code for function printf@plt:
+&lt;+0&gt;:	jmpq   *0x200c12(%rip)        # 0x601018
+&lt;+6&gt;:	pushq  $0x0
+&lt;+11&gt;:	jmpq   0x4003f0
+
+(gdb) x/1xg 0x601018 &larr; section .got.plt
+0x601018:	0x0000000000400406 <span class="red">&larr; printf linked lazily</span>
+
+(gdb) x/2ig 0x4003f0
+   0x4003f0:	pushq  0x200c12(%rip)        # 0x601008
+   0x4003f6:	jmpq   *0x200c14(%rip)        # 0x601010
+</pre>
+<pre>
+$ readelf -r test
+&hellip;
+Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
+  Offset          Info           Type           Sym. Value    Sym. Name + Addend
+000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
+
+$ readelf -S test
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+&hellip;
+  [12] .plt              PROGBITS         00000000004003f0  000003f0
+       0000000000000030  0000000000000010  AX       0     0     16
+&hellip;
+  [25] .got.plt          PROGBITS         0000000000601000  00001000
+       0000000000000028  0000000000000008  WA       0     0     8
+</pre>
+</div>
+
 
 <div class="slide">
 <h1>Dynamic Linking</h1>
@@ -851,8 +925,13 @@ Dump of assembler code for function _start:
 </pre>
 </div>
 
+<div class="slide cover">
+ <br clear="all" />
+ <h1>Execution</h1>
+</div>
+
 <div class="slide">
-<h1>Dynamic Linking</h1>
+<h1>Running code</h1>
 <ul>
 	<li>The kernel does:</li>
 	<ul>
@@ -863,51 +942,34 @@ Dump of assembler code for function _start:
 		<li>If yes it maps this binary in the memory as well</li>
 		</ul>
 		<li>Creates a new process with given start address</li>
-	</ul>
-	<li>The dynamic interpret does:</li>
-	<ul>
-		<li>Load in all binaries listed in the DYNAMIC segment</li>
-		<li>Repeat previous step recursively</li>
-		<li>Handles GNU_* segments</li>
+        <li>Executes <b>dynamic interpreter</b></li>
 	</ul>
 </div>
 
 <div class="slide">
-<h1>Dynamic Linking</h1>
+<h1>Dynamic interpreter</h1>
+<ul>
+    <li>Loads in all binaries listed in the DYNAMIC segment</li>
+    <ul>
+        <li>Repeat recursively</li>
+    </ul>
 <pre>
-$ gdb ./test 
+$ readelf -d test
+
+Dynamic section at offset 0xe28 contains 24 entries:
+  Tag        Type                         Name/Value
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
 &hellip;
-(gdb) set disable-randomization off
-(gdb) b main
-Breakpoint 1 at 0x40057f: file test.c, line 12.
-(gdb) run
-Starting program: /home/ersin/temp/test 
-
-Breakpoint 1, main (argc=1, argv=0x7ffc13a39c88) at test.c:12
-12		print_sum(5,4);
-
-$ pmap $(pgrep test)
-25764:   /home/ersin/temp/test
-0000000000400000      4K r-x-- test
-0000000000600000      4K r---- test
-0000000000601000      4K rw--- test
-00007f23203f7000   1780K r-x-- libc-2.24.so
-00007f23205b4000   2044K ----- libc-2.24.so
-00007f23207b3000     16K r---- libc-2.24.so
-00007f23207b7000      8K rw--- libc-2.24.so
-00007f23207b9000     16K rw---   [ anon ]
-00007f23207bd000    148K r-x-- ld-2.24.so
-00007f23209bd000      8K rw---   [ anon ]
-00007f23209e0000      8K rw---   [ anon ]
-00007f23209e2000      4K r---- ld-2.24.so
-00007f23209e3000      4K rw--- ld-2.24.so
-00007f23209e4000      4K rw---   [ anon ]
-00007ffc13a1a000    132K rw---   [ stack ]
-00007ffc13bf4000      8K r----   [ anon ]
-00007ffc13bf6000      8K r-x--   [ anon ]
-ffffffffff600000      4K r-x--   [ anon ]
- total             4204K
 </pre>
+    <li>Handles GNU_* segments</li>
+	<li>Takes care of dynamic relocations of data (section <em>.rela.dyn</em>) and functions (section <em>.rela.plt</em>)</li>
+	<li>On function execution it fills the function pointer to the <em>.got.plt</em> section (lazy binding)</li>
+</ul>
+</div>
+
+<div class="slide cover">
+ <br clear="all" />
+ <h1>Other features</h1>
 </div>
 
 <div class="slide">
@@ -1040,84 +1102,6 @@ SECTIONS
   .data : { *(.data) }
   .bss : { *(.bss) }
 }
-</pre>
-</div>
-
-<div class="slide">
-<h1>Dynamic interpret</h1>
-<ul>
-	<li>Program which the kernel executes <em>instead</em> of our code</li>
-	<li>Loads dynamic libraries and maps them in our virtual address space</li>
-	<li>Takes care of dynamic relocations of data (section <em>.rela.dyn</em>) and functions (section <em>.rela.plt</em>)</li>
-	<li>The real code then accesses shared data indirectly through <em>.rela.dyn</em> or <em>.rela.plt</em></li>
-	<li>Actually, before the first call even this points to a stub functions for <em>lazy binding</em></li>
-</ul>
-</div>
-
-<div class="slide">
-<h1>Running code</h1>
-<ul>
-	<li>The kernel executes the program interpret, aka. dynamic interpret</li>
-	<li>Dynamic linker loads all required libraries (from <em>.dynamic</em> section)</li>
-	<li>On function execution it fills the function pointer to the <em>.got.plt</em> section</li>
-</ul>
-<pre>
-$ readelf -d test
-
-Dynamic section at offset 0xe28 contains 24 entries:
-  Tag        Type                         Name/Value
- 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
-&hellip;
-</pre>
-<pre>
-$ ldd test
-	linux-vdso.so.1 (0x00007ffd8638f000)
-	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007f2d1e019000)
-	/lib64/ld-linux-x86-64.so.2 (0x0000563858ee0000)
-</pre>
-</div>
-
-<div class="slide">
-<h1>Dynamic relocations example</h1>
-<p>
-<a href="https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html">https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html</a>
-</p>
-<pre>
-(gdb) disassemble main
-Dump of assembler code for function main:
-&hellip;
-&lt;+16&gt;:	callq  0x400400 &lt;printf@plt&gt;
-
-(gdb) disassemble 0x400400
-Dump of assembler code for function printf@plt:
-&lt;+0&gt;:	jmpq   *0x200c12(%rip)        # 0x601018
-&lt;+6&gt;:	pushq  $0x0
-&lt;+11&gt;:	jmpq   0x4003f0
-
-(gdb) x/1xg 0x601018
-0x601018:	0x0000000000400406 <span class="red">&larr; printf linked lazily</span>
-
-(gdb) x/2ig 0x4003f0
-   0x4003f0:	pushq  0x200c12(%rip)        # 0x601008
-   0x4003f6:	jmpq   *0x200c14(%rip)        # 0x601010
-</pre>
-<pre>
-$ readelf -r test
-&hellip;
-Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
-  Offset          Info           Type           Sym. Value    Sym. Name + Addend
-000000601018  000100000007 R_X86_64_JUMP_SLO 0000000000000000 printf@GLIBC_2.2.5 + 0
-
-$ readelf -S test
-Section Headers:
-  [Nr] Name              Type             Address           Offset
-       Size              EntSize          Flags  Link  Info  Align
-&hellip;
-  [12] .plt              PROGBITS         00000000004003f0  000003f0
-       0000000000000030  0000000000000010  AX       0     0     16
-&hellip;
-  [25] .got.plt          PROGBITS         0000000000601000  00001000
-       0000000000000028  0000000000000008  WA       0     0     8
 </pre>
 </div>
 
