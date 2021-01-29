@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Linux crash dump analysis</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>eBPF</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
+ <p>Stanislav Kozina<br>
+Manager, Software Engineering, Red Hat<br>
+ &copy; January 2021</p>
+ </div>
+</div>
+
+<div class="slide">
+<h1>Berkeley Packet Filter (BPF)</h1>
+<ul>
+	<li>Traditional way of network packet filtering</li>
+	<li>Based on virtual machine language passed to kernel which does the actual filtering</li>
+	<li>bpf is used by tcpdump/libpcap</li>
+	<li>Accessible via setsockopt(SO_ATTACH_FILTER)</li>
+	<li>The bytecode can be JIT compiled so processing is fast</li>
+</ul>
+<pre>
+# tcpdump -d icmp
+(000) ldh      [12]
+(001) jeq      #0x800           jt 2	jf 5
+(002) ldb      [23]
+(003) jeq      #0x1             jt 4	jf 5
+(004) ret      #262144
+(005) ret      #0
+# tcpdump -dd icmp
+{ 0x28, 0, 0, 0x0000000c },
+{ 0x15, 0, 3, 0x00000800 },
+{ 0x30, 0, 0, 0x00000017 },
+{ 0x15, 0, 1, 0x00000001 },
+{ 0x6, 0, 0, 0x00040000 },
+{ 0x6, 0, 0, 0x00000000 },
+</pre>
+<pre>
+struct sock_filter code[] = {
+&hellip;
+}
+struct sock_fprog bpf = {
+        .len = sizeof(code) / sizeof(*code),
+        .filter = code,
+};
+
+&hellip;
+        int ret = setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_FILTER, &amp;bpf, sizeof(bpf));
+</pre>
+</div>
+
+<div class="slide">
+<h1>eBPF</h1>
+<ul>
+	<li>Extension of traditional Berkley Packet Filter (bpf)</li>
+	<li>eBPF extends the machine by providing more registers and more memory for interim operations (4096 bytes)</li>
+	<li>Accesible via new syscall bpf(2)<li>
+	<li>The bytecode is verified by the kernel for safety</li>
+	<ul>
+		<li>Eg. it has to finish -- no loops!</li>
+	</ul>
+	<li>Introduces eBPF maps for storing and passing data between kernel and userland</li>
+	<li>Also allows calling of few selected kernel functions</li>
+	<ul>
+		<li>such as register_kprobes()</li>
+	</ul>
+</ul>
+<pre>
+struct bpf_insn insns[] = {
+	BPF_MOV64_REG(BPF_REG_6, BPF_REG_1), /* -EPERM otherwise? */
+	BPF_LD_ABS(BPF_H, 12), /* r0 = skb-&gt;ipproto */
+	BPF_JMP_IMM(BPF_JNE, BPF_REG_0, 0x800, 4),
+	BPF_LD_ABS(BPF_B, 23), /* r0 = skb-&gt;ipproto */
+	BPF_JMP_IMM(BPF_JNE, BPF_REG_0, 1, 2),
+	BPF_MOV64_IMM(BPF_REG_0, -1),
+	BPF_EXIT_INSN(),
+	BPF_MOV64_IMM(BPF_REG_0, 0),
+	BPF_EXIT_INSN(),
+};
+size_t insns_cnt = sizeof(insns) / sizeof(struct bpf_insn);
+&hellip;
+int bpffd = bpf_load_program(BPF_PROG_TYPE_SOCKET_FILTER, insns, insns_cnt);
+int ret = setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_BPF, &amp;bpffd, sizeof(bpffd));
+</div>
+
+<div class="slide">
+<h1>eBPF program types & maps</h1>
+<ul>
+	<li>eBPF allows loading of several types of programs</li>
+	<li>It also allows creation of maps for various types of data</li>
+	<ul>
+		<li>Maps is a generic key-value store</li>
+	</ul>
+	<li>Maps can be accessed from both userland and kernel</li>
+	<ul>
+		<li>Thus can be used to pass data between the two</li>
+	</ul>
+</ul>
+<pre>
+/* BPF syscall commands, see bpf(2) man-page for details. */
+enum bpf_cmd {
+        BPF_MAP_CREATE,
+        BPF_MAP_LOOKUP_ELEM,
+        BPF_MAP_UPDATE_ELEM,
+        BPF_MAP_DELETE_ELEM,
+&hellip;
+        BPF_PROG_LOAD,
+&hellip;
+};
+enum bpf_prog_type {
+        BPF_PROG_TYPE_UNSPEC,
+        BPF_PROG_TYPE_SOCKET_FILTER,
+        BPF_PROG_TYPE_KPROBE,
+&hellip;
+        BPF_PROG_TYPE_PERF_EVENT,
+&hellip;
+};
+</pre>
+</div>
+
+<div class="slide">
+<h1>eBPF functions</h1>
+<ul>
+	<li>eBPF instructions can be used to call certain specific functions</li>
+</ul>
+<pre>
+#define BPF_CALL        0x80    /* function call */
+#define BPF_EXIT        0x90    /* function return */
+
+* void *bpf_map_lookup_elem(&amp;map, &amp;key)
+* int bpf_map_update_elem(&amp;map, &amp;key, &amp;value, flags)
+* int bpf_map_delete_elem(&amp;map, &amp;key)
+* int bpf_probe_read(void *dst, int size, void *src)
+* u32 bpf_raw_smp_processor_id(void)
+* int bpf_trace_printk(const char *fmt, int fmt_size, ...)
+* u64 bpf_get_current_pid_tgid(void)
+* u64 bpf_get_current_task(void)
+</pre>
+<pre>
+int map_fd = bpf_create_map(BPF_MAP_TYPE_ARRAY, sizeof(key), sizeof(value), 256, 0);
+
+struct bpf_insn insns[] = {
+	BPF_STX_MEM(BPF_W, BPF_REG_10, BPF_REG_0, -4), /* *(u32 *)(fp - 4) = r0 */
+	BPF_MOV64_REG(BPF_REG_2, BPF_REG_10),
+	BPF_ALU64_IMM(BPF_ADD, BPF_REG_2, -4), /* r2 = fp - 4 */
+	BPF_LD_MAP_FD(BPF_REG_1, map_fd),
+	BPF_RAW_INSN(BPF_JMP | BPF_CALL, 0, 0, 0, BPF_FUNC_map_lookup_elem),
+&hellip;
+	}
+</div>
+
+<div class="slide">
+<h1>llvm-bpf</h1>
+<ul>
+	<li>Since llvm-3.7 LLVM has backend to generate eBPF bytecode</li>
+</ul>
+<pre>
+#define SEC(NAME) __attribute__((section(NAME), used))
+
+struct bpf_map_def SEC("maps") my_map = {
+        .type = BPF_MAP_TYPE_ARRAY,
+        .key_size = sizeof(__uint32_t),
+        .value_size = sizeof(long),
+        .max_entries = 256,
+};
+
+SEC("kprobe/icmp_rcv")
+int bpf_prog1(struct pt_regs *ctx)
+{
+	struct sk_buff *skb;
+	int len;
+	int key = 0;
+
+	/* non-portable! works for the given kernel only */
+	skb = (struct sk_buff *) PT_REGS_PARM1(ctx);
+	len = _(skb-&gt;len);
+
+        value = bpf_map_lookup_elem(&my_map, &index);
+        if (value)
+                __sync_fetch_and_add(value, len);
+
+	return 0;
+}
+</pre>
+<pre>
+clang -Wall -O2 -emit-llvm -c kprobes_kern.c -o -| llc -march=bpf -filetype=obj -o kprobes_kern.o
+</pre>
+<ul>
+	<li>Linux tree contains <em>samples/bpf/bpf_load.c</em> which can load these sections to the kernel</li>
+	<li>Thus corresponding userland code can be fairly simple</li>
+</ul>
+<pre>
+char filename[256];
+
+snprintf(filename, sizeof(filename), "%s_kern.o", argv[0]);
+(void) load_bpf_file(filename);
+&hellip;
+long long value;
+int key = 0;
+
+bpf_map_lookup_elem(map_fd[0], &amp;key, &amp;value);
+</pre>
+</div>
+
+<div class="slide">
+<h1>BPF Compiler Collection (bcc)</h1>
+<ul>
+	<li>bcc offers python binding</li>
+	<li>Similar structures as with using llvm (still uses llvm for compilation</li>
+</ul>
+<pre>
+b = BPF(text="""
+#include &lt;linux/skbuff.h&gt;
+BPF_HASH(icmp);
+int kprobe__icmp_rcv(struct pt_regs *ctx, struct sk_buff *skb)
+{
+        u64 zero = 0, *value, key = 0;
+
+        value = icmp.lookup_or_init(&amp;key, &amp;zero);
+        (*value) = (*value) + skb-&gt;len;
+        return 0;
+}
+""")
+
+print("Tracing for quick sync's... Ctrl-C to end")
+
+while 1:
+    counts = b.get_table("icmp")
+    for k, v in counts.items():
+        print("Received ICMP packets len: %d " % (v.value))
+    sleep(1)
+</pre>
+</div>
+
+<div class="slide">
+<h1>BPF Compiler Collection (bcc) bitehist</h1>
+<ul>
+	<li>bcc has also some nice extensions</li>
+</ul>
+<pre>
+# Copyright (c) 2015 Brendan Gregg.
+# Licensed under the Apache License, Version 2.0 (the "License")
+#
+# 15-Aug-2015	Brendan Gregg	Created this.
+
+from bcc import BPF
+from time import sleep
+
+# load BPF program
+b = BPF(text="""
+#include <uapi/linux/ptrace.h>
+#include <linux/blkdev.h>
+BPF_HISTOGRAM(dist);
+int kprobe__blk_account_io_completion(struct pt_regs *ctx, struct request *req)
+{
+	dist.increment(bpf_log2l(req-&gt;__data_len / 1024));
+	return 0;
+}
+""")
+
+# header
+print("Tracing... Hit Ctrl-C to end.")
+
+# trace until Ctrl-C
+try:
+	sleep(99999999)
+except KeyboardInterrupt:
+	print
+
+# output
+b["dist"].print_log2_hist("kbytes")
+</pre>
+<pre>
+# python3 bitehist.py
+Tracing... Hit Ctrl-C to end.
+^C     kbytes              : count     distribution
+         0 -&gt; 1          : 62       |****************************************|
+         2 -&gt; 3          : 0        |                                        |
+         4 -&gt; 7          : 24       |***************                         |
+         8 -&gt; 15         : 0        |                                        |
+        16 -&gt; 31         : 0        |                                        |
+        32 -&gt; 63         : 0        |                                        |
+        64 -&gt; 127        : 0        |                                        |
+       128 -&gt; 255        : 2        |*                                       |
+       256 -&gt; 511        : 1        |                                        |
+</pre>
+</div>
+
+<div class="slide">
+<h1>High level eBPF language: bpftrace</h1>
+<pre>
+# bpftrace -e 'kprobe:__x64_sys_* { @[func] = count() }'
+
+Attaching 342 probes...
+&hellip;
+@[__x64_sys_kill]: 1
+@[__x64_sys_getresuid]: 1
+@[__x64_sys_shutdown]: 1
+</pre>
+<pre>
+# bpftrace -e 'kprobe:icmp_* { printf("%s\n", func); } kprobe:icmp_rcv { printf("%s(%p)\n", func, arg0); }'
+icmp_invert_tuple
+icmp_invert_tuple
+icmp_pkt_to_tuple
+icmp_packet
+icmp_rcv(0xffff8f2303de1b00)
+icmp_rcv(0xffff8f2303de1b00)
+&hellip;
+</pre>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
+</div>
+
+</body>
+</html>
