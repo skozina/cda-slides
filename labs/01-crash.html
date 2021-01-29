@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Linux crash dump analysis</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>Linux crash dump analysis</h2>
+ <p>Stanislav Kozina<br>
+Manager, Software Engineering, Red Hat<br>
+ &copy; January 2016</p>
+ </div>
+</div>
+
+<div class="slide">
+	<h1>Agenda</h1>
+	<ul>
+		<li>Opening crash dump with gdb</li>
+		<li>using the crash(8) tool</li>
+		<li>understanding kernel Oops</li>
+		<li>kernel flags, sysrq.</li>
+	</ul>
+</div>
+
+<div class="slide cover">
+<br clear="all" />
+<h1>Userland core dump</h1>
+</div>
+
+<div class="slide">
+<h1>Core dump vs. crash dump</h1>
+<ul>
+	<li><em>core dump</em> is a dump of the memory of a userland process</li>
+	<li><em>crash dump</em> is a dump of the memory of a whole system</li>
+</ul>
+<pre>
+# ./hello
+Segmentation fault (core dumped)
+</pre>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Enabling the core dump</h1>
+<ul>
+	<li>There's a limit of the saved core dump file size</li>
+	<li>Kernel then executes a program to store the memory of the crashed process</li>
+</ul>
+<pre>
+$ ulimit -c unlimited
+$ ulimit -c
+unlimited
+# echo -e "*\t-\tcore\tunlimited" &gt;&gt; /etc/security/limits.conf
+$ cat /proc/sys/kernel/core_pattern
+|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %e
+# coredumpctl &lt;PID&gt;
+</pre>
+<ul>
+	<li>Warning for our VMs: The arguments in core_pattern file are different from those expected by systemd</li>
+	<li>Quick fix:</li>
+	<ul>
+		<li># dnf update --releasever=25 systemd</li>
+		<li># reboot</li>
+	</ul>
+</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Opening the core dump</h1>
+<ul>
+	<li>gdb can use bunch of things to locate stuff in the binary:</li>
+	<ul>
+		<li>Symbol table to find the symbols, eg. functions</li>
+		<li>DWARF debugging data for the type information</li>
+		<li>Source code to be able to print the actual code</li>
+	</ul>
+	<li>The debugging data tend to be huge (~250MB for the kernel)</li>
+	<li>That's why some distributions strip them from the binaries and ship them separately</li>
+	<ul>
+		<li>Fedora/Centos/RHEL -debuginfo packages</li>
+		<li>$ eu-strip --remove-comment -g -f file.debug file</li>
+	</ul>
+	<li>gdb can load debugging symbols from external files</li>
+</ul>
+<pre>
+(gdb) show debug-file-directory
+The directory where separate debug symbols are searched for is "/usr/lib/debug".
+</pre>
+</div>
+
+<div class="slide">
+<h1>Opening the core dump example</h1>
+<pre>
+# ./hello
+Segmentation fault (core dumped)
+# coredumpctl gdb &lt;PID&gt;
+&hellip;
+</pre>
+<pre>
+(gdb) info threads
+  Id   Target Id         Frame
+  * 1    LWP 1873          0x000000000040053a in main () at hello.c:6
+</pre>
+<pre>
+(gdb) info registers
+rax            0x0	0
+&hellip;
+rsi            0x7ffe4338e368	140730026222440
+rdi            0x1	1
+rbp            0x7ffe4338e280	0x7ffe4338e280
+rsp            0x7ffe4338e270	0x7ffe4338e270
+&hellip;
+eflags         0x10202	[ IF RF ]
+</pre>
+<pre>
+(gdb) bt
+#0  0x000000000040053a in main () at hello.c:6
+</pre>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Basic analysis</h1>
+<pre>
+(gdb) print $rsp
+$1 = (void *) 0x7ffded63b6c0
+(gdb) print $rbp
+$2 = (void *) 0x7ffded63b6c0
+(gdb) x/10xg $rsp
+0x7ffded63b6c0:	0x00007ffded63b6f0	0x000000000040057d
+0x7ffded63b6d0:	0x00007ffded63b7d8	0x0000000100400450
+0x7ffded63b6e0:	0x0000000000000000	0x0000000000000000
+0x7ffded63b6f0:	0x00000000004005b0	0x00007f16d9229401
+0x7ffded63b700:	0x0000000000040000	0x00007ffded63b7d8
+(gdb) disassemble $rip
+Dump of assembler code for function bar:
+   0x0000000000400595 &lt;+0&gt;:	push   %rbp
+   0x0000000000400596 &lt;+1&gt;:	mov    %rsp,%rbp
+   0x0000000000400599 &lt;+4&gt;:	mov    %rdi,-0x8(%rbp)
+   0x000000000040059d &lt;+8&gt;:	mov    $0x0,%eax
+=&gt; 0x00000000004005a2 &lt;+13&gt;:	movl   $0x5,(%rax)
+   0x00000000004005a8 &lt;+19&gt;:	mov    $0x5,%eax
+   0x00000000004005ad &lt;+24&gt;:	pop    %rbp
+   0x00000000004005ae &lt;+25&gt;:	retq
+End of assembler dump.
+Dump of assembler code for function main:
+   0x0000000000400546 &lt;+0&gt;:	push   %rbp
+   0x0000000000400547 &lt;+1&gt;:	mov    %rsp,%rbp
+   0x000000000040054a &lt;+4&gt;:	sub    $0x20,%rsp
+   0x000000000040054e &lt;+8&gt;:	mov    %edi,-0x14(%rbp)
+   0x0000000000400551 &lt;+11&gt;:	mov    %rsi,-0x20(%rbp)
+   0x0000000000400555 &lt;+15&gt;:	movq   $0x0,-0x10(%rbp)
+   0x000000000040055d &lt;+23&gt;:	mov    $0xd,%edx
+   0x0000000000400562 &lt;+28&gt;:	mov    $0x400640,%esi
+   0x0000000000400567 &lt;+33&gt;:	mov    $0x1,%edi
+   0x000000000040056c &lt;+38&gt;:	callq  0x400430 &lt;write@plt&gt;
+   0x0000000000400571 &lt;+43&gt;:	lea    -0x10(%rbp),%rax
+   0x0000000000400575 &lt;+47&gt;:	mov    %rax,%rdi
+   0x0000000000400578 &lt;+50&gt;:	callq  0x400595 &lt;bar&gt;
+&hellip;
+(gdb) print $rsp+0x30
+$3 = (void *) 0x7ffded63b6f0
+(gdb) print $rsp+0x30-0x20
+$4 = (void *) 0x7ffded63b6d0
+(gdb) x/1xg 0x7ffded63b6d0
+0x7ffded63b6d0:	0x00007ffded63b7d8
+(gdb) x/1xg 0x00007ffded63b7d8
+0x7ffded63b7d8:	0x00007ffded63d579
+(gdb) x/1s 0x00007ffded63d579
+0x7ffded63d579:	"./prog"
+(gdb) bt
+#0  0x00000000004005a2 in bar (arg=0x7ffded63b6e0) at foo.c:10
+#1  0x000000000040057d in main (argc=1, argv=0x7ffded63b7d8) at main.c:10
+</pre>
+</div>
+
+<div class="slide">
+<h1>Things to remember</h1>
+<ul>
+	<li><em>push</em> first decrements %rsp, then stores the value</li>
+	<ul>
+		<li>So the $rsp points to the last <em>used</em>value</li>
+	</ul>
+	<li><em>call</em> pushes on the stack the address of the <em>next</em> instruction after call</li>
+	<li>Always read the assembly from the top of the function and go down!</li>
+	<li>Often arguments get copied to the non-volatile registers which are then stored on stack</li>
+</ul>
+</div>
+
+<div class="slide cover">
+<br clear="all" />
+<h1>Linux crash</h1>
+</div>
+
+<div class="slide">
+<h1>Linux Oops</h1>
+<ul>
+	<li>Printed when things go south</li>
+	<li>Leaves the system running, but unstable!</li>
+<pre>
+$ cat /proc/sys/kernel/panic_on_oops
+0
+</pre>
+	<li>The current task is killed</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Linux Oops</h1>
+<pre>
+BUG: unable to handle kernel NULL pointer dereference at           (null)
+IP: [&lt;ffffffff814c4f26&gt;] sysrq_handle_crash+0x16/0x20
+PGD 0
+Oops: 0002 [#1] SMP
+Modules linked in: acpi_cpufreq virtio_blk virtio_net virtio_console virtio_pci serio_raw virtio_ring virtio
+CPU: 0 PID: 1736 Comm: bash Not tainted 4.8.0 #7
+Hardware name: Red Hat RHEV Hypervisor, BIOS 1.9.1-5.el7_3.1 04/01/2014
+task: ffff88003b420000 task.stack: ffff88003aff8000
+RIP: 0010:[&lt;ffffffff814c4f26&gt;]  [&lt;ffffffff814c4f26&gt;] sysrq_handle_crash+0x16/0x20
+RSP: 0018:ffff88003affbdd8  EFLAGS: 00010282
+RAX: 000000000000000f RBX: 0000000000000063 RCX: 0000000000000000
+RDX: 0000000000000000 RSI: ffff88003fa0c8e8 RDI: 0000000000000063
+RBP: ffff88003affbdd8 R08: 0000000000000001 R09: 0000000000000002
+R10: 0000000000000001 R11: 0000000000000174 R12: 0000000000000001
+R13: 0000000000000000 R14: ffffffff81cb3e80 R15: 0000000000000000
+FS:  00007f98fd950700(0000) GS:ffff88003fa00000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 0000000000000000 CR3: 000000003aad1000 CR4: 00000000000406b0
+Stack:
+ ffff88003affbe08 ffffffff814c56e6 0000000000000002 fffffffffffffffb
+ ffff88003afce000 000055888cc7fbd0 ffff88003affbe20 ffffffff814c5b1f
+ ffff880036821ec0 ffff88003affbe40 ffffffff81273482 ffff88003afce000
+Call Trace:
+ [&lt;ffffffff814c56e6&gt;] __handle_sysrq+0xf6/0x150
+ [&lt;ffffffff814c5b1f&gt;] write_sysrq_trigger+0x2f/0x40
+ [&lt;ffffffff81273482&gt;] proc_reg_write+0x42/0x70
+ [&lt;ffffffff81202c57&gt;] __vfs_write+0x37/0x160
+ [&lt;ffffffff81222743&gt;] ? __fd_install+0x33/0xe0
+ [&lt;ffffffff8122259f&gt;] ? __alloc_fd+0x3f/0x170
+ [&lt;ffffffff810c35e2&gt;] ? percpu_down_read+0x12/0x50
+ [&lt;ffffffff81203595&gt;] vfs_write+0xb5/0x1a0
+ [&lt;ffffffff812049e5&gt;] SyS_write+0x55/0xc0
+ [&lt;ffffffff816d219b&gt;] entry_SYSCALL_64_fastpath+0x13/0x8f
+Code: a2 81 e8 9e a7 c4 ff e9 e2 fe ff ff 66 0f 1f 84 00 00 00 00 00 66 66 66 66 90 55 c7 05 b4 72 75 00 01 00 00 00 48 89 e5 0f ae f8 &lt;c6&gt; 04 25 00 00 00 00 01 5d c3 66 66 66 66 90 55 c7 05 40 c4 76
+RIP  [&lt;ffffffff814c4f26&gt;] sysrq_handle_crash+0x16/0x20
+ RSP &lt;ffff88003affbdd8&gt;
+CR2: 0000000000000000
+</pre>
+</div>
+
+<div class="slide">
+<h1>Common type of bugs</h1>
+<ul>
+	<li>All kinds of memory corruption bugs</li>
+	<ul>
+		<li>It all boils down to the failure in page tables</li>
+	</ul>
+	<li><em>Soft lockup</em> &mdash; scheduling doesn't work for some time</li>
+	<li><em>Hard lockup</em> &mdash; IRQs are not being processed for some time</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Magical SysRq key</h1>
+<ul>
+	<li>Several operations can be done through a magic key</li>
+	<ul>
+		<li>Loglevel, panic/crash, reboot, sync fs, dump processes, SIGINT/SIGKILL processes, memory information, pending timers, etc...</li>
+		<li>Prints to kernel log (dmesg)</li>
+	</ul>
+	<li>Can be also activated by writing to <em>/proc/sysrq-trigger</em></li>
+	<li>H - shows full help</li>
+<pre>
+sysrq: SysRq : HELP : loglevel(0-9) reboot(b) crash(c) terminate-all-tasks(e)
+ memory-full-oom-kill(f) kill-all-tasks(i) thaw-filesystems(j) sak(k)
+ show-backtrace-all-active-cpus(l) show-memory-usage(m) nice-all-RT-tasks(n)
+ poweroff(o) show-registers(p) show-all-timers(q) unraw(r) sync(s)
+ show-task-states(t) unmount(u) force-fb(V) show-blocked-tasks(w)
+ dump-ftrace-buffer(z)
+</pre>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Linux taint flags</h1>
+<ul>
+	<li>Basic list of important events which have happened to the kernel</li>
+	<ul>
+		<li><em>TAINT_PROPRIETARY_MODULE</em> &mdash; non-GPL module loaded</li>
+		<li><em>TAINT_MACHINE_CHECK</em> &mdash; MCE detected</li>
+		<li><em>TAINT_OOT_MODULE</em> &mdash; Out of tree module</li>
+		<li><em>TAINT_LIVEPATCH</em> &mdash; kpatch</li>
+	</ul>
+	<li>Defined in <em>include/linux/kernel.h</em></li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Stack unwinding</h1>
+<ul>
+	<li>Oops helps us to see the stack and identify faulting code path</li>
+	<li>Doesn't help much when some other task is involved in the crash</li>
+	<li>Watch out for the -fomit-frame-pointer</li>
+	<ul>
+		<li>The function address is detected if it belongs to the .text segment</li>
+		<li>Reliable address only if %rsp == %rbp + sizeof (void *)</li>
+		<li>If not reliable, a question mark (?) is printed</li>
+		<li>CONFIG_FRAME_POINTER</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Other debug options</h1>
+<ul>
+	<li><em>DEBUG_SLAB</em> &mdash; poison buffers allocated by SLAB allocator</li>
+	<li><em>DEBUG_KASAN</em> &mdash; instrument kernel with the ASan technique</li>
+	<li><em>DEBUG_STACKOVERFLOW</em> &mdash; check for overflow of the stack</li>
+	<li><em>PROVE_LOCKING</em> &mdash; ensure that the locks don't form a circle</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Linux kdump</h1>
+<ul>
+	<li>Linux can create a crash dump</li>
+	<li>Needs kdump kernel to be loaded</li>
+<pre>
+# cat /proc/cmdline
+BOOT_IMAGE=/vmlinuz-4.8.0 root=UUID=e59cb8c4-4f3d-43fc-b575-4c020dc92909 ro crashkernel=256M console=ttyS0,115200n8
+</pre>
+	<li>We need to load the panic kernel on boot</li>
+	<ul>
+		<li>kdump service</li>
+	</ul>
+	<li>The panic kernel then executes a single task to create the vmcore</li>
+	<ul>
+		<li>based on /etc/kdump.conf</li>
+		<li>We might want to skip some, eg. zero or userland, pages</li>
+		<li>/usr/sbin/makedumpfile</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Opening the vmcore</h1>
+<ul>
+	<li>The tool for working with the vmcore is <em>crash</em></li>
+	<li><em>crash</em> internally uses gdb for processing the vmcore</li>
+	<li>But it often modifies the output from gdb</li>
+	<li>It can run on a vmcore file</li>
+<pre>
+# crash /lib/modules/4.8.0/build/vmlinux /var/crash/127.0.0.1-2017-02-17-16\:48\:37/vmcore
+</pre>
+	<li>It can also run a live system</li>
+<pre>
+# crash /lib/modules/4.8.0/build/vmlinux
+</pre>
+	<li>The vmlinux file provided needs to contain the DWARF debugging information</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Opening the vmcore</h1>
+<pre>
+# crash
+&hellip;
+      KERNEL: /lib/modules/4.8.0/build/vmlinux
+    DUMPFILE: /dev/mem
+        CPUS: 1
+        DATE: Tue Feb 21 16:55:42 2017
+      UPTIME: 1 days, 07:58:32
+LOAD AVERAGE: 0.21, 0.07, 0.02
+       TASKS: 73
+    NODENAME: cda-test1
+     RELEASE: 4.8.0
+     VERSION: #7 SMP Tue Nov 22 15:59:45 CET 2016
+     MACHINE: x86_64  (3198 Mhz)
+      MEMORY: 1 GB
+         PID: 3782
+     COMMAND: "crash"
+        TASK: ffff88003b2dd580  [THREAD_INFO: ffff88003bbe0000]
+         CPU: 0
+       STATE: TASK_RUNNING (ACTIVE)
+</pre>
+</div>
+
+<div class="slide">
+<h1>Looking around</h1>
+<ul>
+	<li>help &mdash; prints list of all commands</li>
+	<li>mod -S &mdash; load debug information for all loaded modules</li>
+	<li>sym {-l | -m &lt;module&gt; | &lt;address&gt;} &mdash; symbol details</li>
+	<li>set hex &mdash; set crash output to hex</li>
+	<ul>
+		<li>Doesn't change the gdb output base;-/</li>
+	</ul>
+	<li>sys &mdash; basic OS system information, sys -i &mdash; DMI system information from BIOS (x86)</li>
+	<li>mach [-m|-c] &mdash; machine specific information</li>
+	<li>dev &mdash; character and block devices, dev -d &mdash; block layer and driver I/O queues</li>
+	<li>timer [-r] &mdash; pending [high resolution] timers details</li>
+	<li>files -d &lt;dentry&gt; &mdash; details about any given file</li>
+	<li>net &mdash; network devices</li>
+	<li>rd/wr &mdash; read/write (on live system) data from memory</li>
+	<li>p &mdash; evaluate an expression (for example print a value of some symbol)</li>
+	<li>foreach ... &lt;cmd&gt; &mdash; execute a command on a selected group of tasks</li>
+	<li>dis [-l|-r] {&lt;address&gt; | symbol} &mdash; disassemble machine code</li>
+	<li>log &mdash; system log buffer</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Process related stuff</h1>
+<ul>
+	<li>ps [-p | -c | -m | -t] &mdash; process listing (parents, childs, timestamps...)</li>
+	<li>runq &mdash; runqueue listing</li>
+	<li>bt [-s] &mdash; print stack</li>
+	<ul>
+		<li>bt -S &lt;stack_address&gt; &mdash; start unrolling at given top</li>
+		<li>bt {-f | [-F[F]]} &mdash; print the raw content of the stack frame, [resolve slab cache objects]</li>
+		<li>bt -r &mdash; dump raw stack memory</li>
+		<li>bt -c &lt;cpu_number&gt; &mdash; backtrace task running on given cpu</li>
+		<li>bt -a &mdash; print stack for all cpus</li>
+		<li>bt -e &mdash; search for and dump exception frames on stack</li>
+		<li>bt -E &mdash; dump exceptin frames on NMI/IRQ/double fault/debug stacks</li>
+	</ul>
+	<li>files &mdash; open file descriptors details</li>
+	<li>net -s &mdash; open sockets details</li>
+	<li>vm &mdash; prints memory areas of given task</li>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Memory related stuff</h1>
+<ul>
+	<li>kmem &lt;address&gt; &mdash; detailed information about given memory (if valid/available)</li>
+	<ul>
+		<li>kmem -i &mdash; system memory summary (total, free, available, slab, cache/buffers, swap)</li>
+		<li>kmem -s [&lt;object&gt;] &mdash; SLAB cache dump/details</li>
+		<li>kmem -p [&lt;phys | page&gt;] &mdash; details about physical page frame</li>
+		<li>kmem -n &mdash; NUMA related details</li>
+		<li>kmem -z &mdash; memory zones details</li>
+	</ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Task states</h1>
+<ul>
+	<li><em>TASK_RUNNING</em> &mdash; On the CPU or runq</li>
+	<li><em>TASK_INTERUPTIBLE</em> &mdash; Wait for an event or until a signal is received</li>
+	<li><em>TASK_UNINTERUPTIBLE</em> &mdash; Wait while ignoring signals</li>
+</ul>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
+</div>
+
+</body>
+</html>

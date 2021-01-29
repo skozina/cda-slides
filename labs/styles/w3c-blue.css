@@ -41,7 +41,7 @@ div.slide {
 }
 
 div.background {
-  z-index: 150;
+  z-index: 1;
   position: absolute;
   vertical-align: bottom;
   left: 0;
@@ -52,6 +52,7 @@ div.background {
   padding: 0 0 0 0.2em;
   margin: 0 0 0 0;
   border-width: 0;
+  background-color: #728ec2;
 }
 
 div.background img {
@@ -70,34 +71,34 @@ div.slide h1 {
   margin-left: 0;
   margin-right: 0;
   min-height: 2.3em;
-  color: black;
+  color: white;
   height: 2.2em;
   font-size: 160%;
   line-height: 1.1em;
 }
 
 div.slide h1 a {
-  color: black;
+  color: white;
   text-decoration: none;
 }
 
 div.slide h1 a:link {
-  color: blue;
+  color: white;
   text-decoration: none;
 }
 
 div.slide h1 a:visited {
-  color: black;
+  color: white;
   text-decoration: none;
 }
 
 div.slide h1 a:hover {
-  color: blue;
+  color: white;
   text-decoration: underline;
 }
 
 div.slide h1 a:active {
-  color: blue;
+  color: red;
   text-decoration: underline;
 }
 
@@ -110,7 +111,7 @@ div.slide h1 a:active {
   border-width: 0;
   height: 3em;
   max-width: 3em;
-  z-index: 25;
+  z-index: 2;
   float: left;
 }
 
@@ -247,12 +248,12 @@ div.cover p.explanation {
 td,th { padding: 0.2em }
 
 ul {
-  margin: 4.5em 1.5em 0.5em 1.5em;
+  margin: 0.5em 1.5em 0.5em 1.5em;
   padding: 0;
 }
 
 ol {
-  margin: 4.5em 1.5em 0.5em 1.5em;
+  margin: 0.5em 1.5em 0.5em 1.5em;
   padding: 0;
 }
 
@@ -440,7 +441,7 @@ div[class="footer"] {
 }
 
 div.slide.cover {
-  color: black;
+  color: white;
   background-color: #728ec2;
   padding-top: 0;
   padding-right: 0;
@@ -450,19 +451,17 @@ div.slide.cover {
 
 div.slide.cover h1 {
   margin: 0;
-  padding: 0.25em 0.5em;
-  color: black;
+  padding: 0.5em;
+  color: white;
   height: auto;
 }
 
 div.slide.cover h2 {
-  margin: 0;
-  padding: 0.25em 0.5em;
-  color: black;
+  color: white;
 }
 
 div.slide.cover a {
-  color: black;
+  color: white;
 }
 
 div.slide.cover a:visited { color: white }
