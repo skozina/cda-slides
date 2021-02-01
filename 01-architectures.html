@@ -4,7 +4,7 @@
 <head>
   <title>Binary Code Analysis - Agenda</title>
   <meta name="copyright"
-   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+    content="Copyright &#169; 2021 Stanislav Kozina <skozina@redhat.com>, Viktor Malik <vmalik@redhat.com>" />
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <link rel="stylesheet" type="text/css" media="screen, projection, print"
    href="styles/slidy.css" />
@@ -28,9 +28,11 @@
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
  <h2>Computer Architectures</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
 Manager, Software Engineering, Red Hat<br>
- &copy; January 2016</p>
+ &copy; January 2021</p>
  </div>
 </div>
 
@@ -1158,52 +1160,77 @@ bar:
 
 <div class="slide cover">
  <br clear="all" />
- <h1>ppc64</h1>
+ <h1>ARM (AArch)</h1>
 </div>
 
 <div class="slide">
-<h1>Registers</h1>
+<h1>CPU modes</h1>
 <ul>
-	<li>32 General Purpose Registers (<em>GPRs</em>)</li>
-	<ul>
-		<li>GPR0 &mdash; for syscall number, reserved</li>
-		<li>GPR1 &mdash; stack pointer</li>
-		<li>GPR2 &mdash; pointer to Table Of Contents (TOC)</li>
-		<li>GPR3..GPR10 &mdash; function arguments (all volatile)</li>
-		<li>GPR3 &mdash; return value (volatile)</li>
-		<li>GPR14..GPR31 &mdash; non volatile</li>
-		<li>(optional) GPR31 &mdash; frame pointer</li>
-	</ul>
-	<li>Conditional Register (<em>CR</em>) &mdash; set of 8 4-bit status registers.</li>
-	<li>Count Register (<em>CTR</em>) for loop iteration counts.</li>
-	<li>Link Register (<em>LR</em>) for last return address to speed up leaf calls.</li>
+    <li>User &mdash; non-privileged</li>
+    <li>FIQ &mdash; fast interrupt handling</li>
+    <li>IRQ &mdash; normal interrupt handling</li>
+    <li>Supervisor &mdash; OS privileged mode</li>
+    <li>Abort &mdash; virtual memory and memory protection</li>
+    <li>Undefined &mdash; emulation of co-processors in HW</li>
+    <li>System &mdash; privileged mode</li>
 </ul>
 </div>
 
 <div class="slide">
-<h1>Move</h1>
+<h1>AArch32 register shadowing</h1>
+<table class="border centered">
+    <tr>
+        <th>usr</th>
+        <th>sys</th>
+        <th>svc</th>
+        <th>abt</th>
+        <th>und</th>
+        <th>irq</th>
+        <th>fiq</th>
+    </tr>
+    <tr><td colspan="7">R0 &mdash; R7</td></tr>
+    <tr>
+        <td colspan="6">R8 &mdash; R12</td>
+        <td>R8_fiq &mdash; R12_fiq</td>
+    </tr>
+    <tr>
+        <td colspan="2">R13, R14</td>
+        <td>R13_svc, R14_svc</td>
+        <td>R13_abt, R14_abt</td>
+        <td>R13_und, R14_und</td>
+        <td>R13_irq, R14_irq</td>
+        <td>R13_fiq, R14_fiq</td>
+    </tr>
+    <tr><td colspan="7">R15</td></tr>
+    <tr><td colspan="7">CPSR</td></tr>
+    <tr>
+        <td colspan="2"></td>
+        <td>SPSR_svc</td>
+        <td>SPSR_abt</td>
+        <td>SPSR_und</td>
+        <td>SPSR_irq</td>
+        <td>SPSR_fiq</td>
+    </tr>
+</table>
 <ul>
-	<li><em>mr</em>&mdash; Move to Register</li>
+    <li>R13 &mdash; Stack Pointer</li>
+    <li>R14 &mdash; Link Register (contains return address)</li>
+    <li>R15 &mdash; Program Counter</li>
+    <li>C(S)PSR &mdash; Current (Stored) Program Status Register</li>
 </ul>
 </div>
 
 <div class="slide">
-<h1>Load/Store</h1>
+<h1>AArch64</h1>
 <ul>
-	<li><em>lw/ld</em>&mdash; Load word/double word</li>
-	<li><em>li/lis</em>&mdash; Load immediate (shifted by 16 bits). Clears upper/lower 16 bits.</li>
-	<li><em>stw/std</em>&mdash; Store word/double word</li>
-	<li><em>stwu/stdu</em>&mdash; Store word/double word and update register with target address</li>
-</ul>
-</div>
-
-<div class="slide">
-<h1>Link Register</h1>
-<ul>
-	<li><em>mflr</em>&mdash; Move from link register.</li>
-	<li><em>mtlr</em>&mdash; Move to link register.</li>
-	<li><em>bl</em>&mdash; Branch and store return value to LR.</li>
-	<li><em>blr</em>&mdash; Return to LR.</li>
+	<li>R0-R30 &mdash; general-purpose registers (with W0-W30 being the lower halves)</li>
+    <li>R30 used for <em>link register</em></li>
+    <li>R31 &mdash; <em>stack pointer</em> for instructions dealing with stack, <em>zero register</em> for others</em></li>
+    <li>4 exception levels (EL0-EL3)</li>
+    <ul>
+        <li>Each has its own stack pointer, link register, and saved program status register</li>
+        <li>No other registers are shadowed</li>
+    </ul>
 </ul>
 </div>
 
@@ -1248,19 +1275,6 @@ bar:
 		</ul>
 	<li>
 	<li>gcc __attribute__((aligned(16)));</li>
-</ul>
-</div>
-
-<div class="slide">
-<h1>Register shadowing</h1>
-<ul>
-	<li>Not all registers might be visible at all times</li>
-	<li>A different physical register can be accessible under the same name</li>
-	<ul>
-		<li>Useful for interrupt handling, etc</li>
-	</ul>
-	<li>Sparc <em>register windows</em></li>
-	<li>ARM <em>seven processor modes</em></li>
 </ul>
 </div>
 

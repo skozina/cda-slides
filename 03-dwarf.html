@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - DWARF debug info</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>DWARF debug info</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
+ <p>Stanislav Kozina<br>
+Manager, Software Engineering, Red Hat<br>
+ &copy; January 2021</p>
+ </div>
+</div>
+
+<div class="slide">
+	<h1>DWARF debug info</h1>
+	<table style="width:90%;">
+	<tr><td>
+	<ul>
+		<li>The standard debugging format nowadays</li>
+		<li>Four standards released, fifth being finished</li>
+		<li>Since version 2 mostly additions of new types</li>
+		<li>GCC generates DWARF4 by default since gcc-4.8</li>
+	</ul>
+	</td><td align="right">
+	<img alt="DWARF debugging standard" src="images/dwarf_logo.gif" width="180em"/>
+	<p class="grey">Source: http://www.dwarfstd.org/</p>
+	</td></tr>
+	</table>
+<pre>
+$ gcc -g -o prog code.c
+$ gdb prog
+&hellip;
+(gdb) b main
+Breakpoint 1 at 0x400400: file main.c, line 4.
+(gdb) run
+Starting program: ~/prog
+
+Breakpoint 1, main (argc=1, argv=0x7fffffffe228) at main.c:4
+4	int main(int argc, char **argv) {
+
+(gdb) p *argv
+$1 = 0x7fffffffe515 "./prog"
+</pre>
+</div>
+
+<div class="slide">
+	<h1>DWARF debug info</h1>
+	<ul>
+		<li>Represented by bunch of ELF sections:</li>
+		<ul>
+			<li>.debug_info - Type graph</li>
+			<li>.debug_abbrev - Type schema</li>
+			<li>.debug_line - Line numbers</li>
+		</ul>
+		<li>Used also by some tracing tools (systemtap, kprobes)</li>
+	</ul>
+	<pre>
+$ readelf -S prog
+&hellip;
+  [27] .debug_aranges    PROGBITS         0000000000000000  0000107c
+       0000000000000060  0000000000000000           0     0     1
+  [28] .debug_info       PROGBITS         0000000000000000  000010dc
+       0000000000000428  0000000000000000           0     0     1
+  [29] .debug_abbrev     PROGBITS         0000000000000000  00001504
+       00000000000001d8  0000000000000000           0     0     1
+  [30] .debug_line       PROGBITS         0000000000000000  000016dc
+       0000000000000103  0000000000000000           0     0     1
+  [31] .debug_str        PROGBITS         0000000000000000  000017df
+       00000000000002b6  0000000000000001  MS       0     0     1
+  [32] .debug_loc        PROGBITS         0000000000000000  00001a95
+       0000000000000072  0000000000000000           0     0     1
+  [33] .debug_ranges     PROGBITS         0000000000000000  00001b07
+       0000000000000020  0000000000000000           0     0     1
+</pre>
+</div>
+
+<div class="slide">
+	<h1>CU and DIEs</h1>
+	<ul>
+		<li>The .debug_info and .debug_abbrev form a graph of CUs and DIEs</li>
+		<ul>
+			<li>a linked list of all <em>Compilation Units</em> (CU)</li>
+			<li>Each CU contains a directed graph of <em>Debugging Information Entries</em> (DIE)</li>
+			<li>Each DIE has a bunch of <em>Attributes</em></li>
+		</ul>
+		<li>Each CU corresponds to one original translation unit</li>
+		<ul>
+			<li>Linker just concatenates all CUs it links</li>
+		</ul>
+	</ul>
+<pre>
+$ readelf --debug=info prog
+&hellip;
+ &lt;1&gt;&lt;3bf&gt;: Abbrev Number: 2 (DW_TAG_structure_type)
+    &lt;3c0&gt;   DW_AT_name        : foo
+    &lt;3c4&gt;   DW_AT_byte_size   : 8
+    &lt;3c5&gt;   DW_AT_decl_file   : 2
+    &lt;3c6&gt;   DW_AT_decl_line   : 4
+    &lt;3c7&gt;   DW_AT_sibling     : &lt;0x3e0&gt;
+</pre>
+</div>
+
+<div class="slide">
+	<h1>CU and DIEs</h1>
+	<img alt="CU and DIEs" src="images/cu-die.svg" width="60%"/>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title>Binary Code Analysis - Live kernel tracing</title>
+  <meta name="copyright"
+   content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/slidy.css" />
+  <link rel="stylesheet" type="text/css" media="screen, projection, print"
+   href="styles/w3c-blue.css" />
+  <script src="scripts/slidy.js" charset="utf-8"
+   type="text/javascript"></script>
+  <link rel="stylesheet" type="text/css" href="styles/cda.css" />
+</head>
+
+<body>
+
+<div class="background">
+  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" id="head-logo" />
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>Binary Code Analysis</h1>
+ <h2>Live kernel tracing</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
+ <p>Stanislav Kozina<br>
+Manager, Software Engineering, Red Hat<br>
+ &copy; January 2021</p>
+ </div>
+</div>
+
+<div class="slide">
+	<h1>Agenda</h1>
+	<ul>
+		<li>strace, ltrace</li>
+		<li>Systemtap</li>
+		<li>ftrace</li>
+	</ul>
+</div>
+
+<div class="slide">
+<h1>strace</h1>
+<ul>
+	<li>Allows tracing of syscalls done by target process</li>
+	<li>Built on top of <em>ptrace(2)</em> API which uses <em>waitpid(2)</em></li>
+	<ul>
+		<li>Allows monitoring of received traps</li>
+		<li>Also allows tracing of syscalls and changes in memory of target process</li>
+		<li>Used eg. by strace, ltrace and gdb</li>
+	</ul>
+	<li>strace stops tracee, parses its registers, identifies the syscall</li>
+	<li>Has its own syscall table and decoders for all of them</li>
+	<li>It can also modify the tracee (return value, signal injection!)</li>
+</ul>
+<pre>
+$ strace ./prog &ht; /dev/null
+execve("./prog", ["./prog"], [/* 47 vars */]) = 0
+brk(NULL)                               = 0x2009000
+mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f08d1e08000
+&hellip;
+open("/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+&hellip;
+write(1, "Hello world!\n", 13)          = 13
+&hellip;
+</pre>
+<pre>
+$ strace -e %file /bin/true
+execve("/bin/true", ["/bin/true"], 0x7fffc2aecfb0 /* 66 vars */) = 0
+access("/etc/ld.so.preload", R_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+openat(AT_FDCWD, "/lib64/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+</pre>
+</div>
+
+<div class="slide">
+<h1>ltrace</h1>
+<ul>
+	<li>Also built on top of <em>ptrace</em></li>
+	<li>Intercepts library function address in .got.plt with <em>int 0x3</em></li>
+	<li>The int instruction causes <em>SIGTRAP</em></li>
+	<li>The signal can be detected through the <em>ptrace</em> interface</li>
+</ul>
+<pre>
+$ ltrace ./prog &gt; /dev/null
+write(1, "Hello world!\n", 13)  = 13
++++ exited (status 0) +++
+</pre>
+</div>
+
+<div class="slide">
+<h1>kprobes</h1>
+<ul>
+	<li>Allows attaching functions to certain places in the kernel</li>
+	<li>Instruction at target address is copied to the safe buffer</li>
+	<li>Then the address is replaced with breakpoint instruction (int3)</li>
+	<li>When the trap is hit, kprobes execute registered handler</li>
+	<li>Can also be attached to returns from a functions (kretprobes)</li>
+	<ul>
+		<li>Return address is replaced with an address of a trampoline<li>
+		<li>Trampolines then can be hooked</li>
+	</ul>
+	<li>Do not confuse with statically defined <em>tracepoints</em></li>
+</ul>
+<pre>
+static int handler_pre(struct kprobe *p, struct pt_regs *regs)
+{
+	&hellip;
+}
+
+static int __init kprobe_init(void)
+{
+	int ret;
+	kp.pre_handler = handler_pre;
+	kp.post_handler = handler_post;
+	kp.fault_handler = handler_fault;
+
+	ret = register_kprobe(&amp;kp);
+	if (ret < 0) {
+		printk(KERN_INFO "register_kprobe failed, returned %d\n", ret);
+		return ret;
+	}
+	return 0;
+}
+</pre>
+</div>
+
+<div class="slide">
+<h1>systemtap</h1>
+<ul>
+	<li>Tool for analysis of live running Linux system</li>
+	<li>Allows analysis of both userland and kernel</li>
+	<li>Can also attach to C++, Python and Java functions</li>
+	<li>Build using kprobes and uprobes</li>
+</ul>
+<pre>
+# stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s\n", ppfunc()); }'
+-&gt; icmpv6_rcv
+-&gt; icmpv6_rcv
+# stap -v -e 'probe kernel.function("icmp_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), ulong_arg(1)); }'
+-&gt; icmp_rcv(0xffff8f2316224200)
+-&gt; icmp_rcv(0xffff8f2316224700)
+</pre>
+</div>
+
+<div class="slide">
+<h1>systemtap</h1>
+<pre>
+probe kernel.function("icmpv6_*").call
+{
+    printf(" -&gt; %s %s\n", ppfunc(), $$parms);
+}
+
+probe kernel.function("icmpv6_*").return
+{
+    printf(" &lt;- %s %s\n", ppfunc(), $$return);
+}
+</pre>
+<pre>
+# stap trace.stap
+WARNING: function icmpv6_init is in blacklisted section: keyword at trace.stap:1:1
+ source: probe kernel.function("icmpv6_*").call
+         ^
+ -&gt; icmpv6_rcv skb=0xffff898a35692c00
+ -&gt; icmpv6_echo_reply skb=0xffff898a35692c00
+ -&gt; icmpv6_getfrag from=0xffff898a3d203ae0 to=0xffff898a349eea58 offset=0x0 len=0x38 odd=0x0 skb=0xffff898a35692100
+ &lt;- icmpv6_getfrag return=0x0
+ -&gt; icmpv6_push_pending_frames sk=0xffff8989f69e3f00 fl6=0xffff898a3d203b08 thdr=0xffff898a3d203b00 len=0x40
+ &lt;- icmpv6_push_pending_frames
+ &lt;- icmpv6_echo_reply
+ &lt;- icmpv6_rcv return=0x0
+</pre>
+</div>
+
+<div class="slide">
+<h1>ftrace</h1>
+<ul>
+	<li>Trace interface for set of given tracepoints</li>
+	<li>Allows creating dynamic tracepoints via kprobes</li>
+	<li>Accessible via debugfs</li>
+	<li>Ftrace can also generate call graphs by attached to all kprobes</li>
+	<li>Read <em>Documentation/trace/ftrace.txt</em> and <em>Documentation/trace/kprobetrace.txt</em></li>
+</ul>
+<pre>
+# echo 0 &gt; /sys/kernel/debug/tracing/events/kprobes/enable
+# echo "p icmpv6_rcv skb=%di" &gt;> /sys/kernel/debug/tracing/kprobe_events
+# echo 1 &gt; /sys/kernel/debug/tracing/events/kprobes/enable
+# tail /sys/kernel/debug/tracing/trace
+          &lt;idle&gt;-0     [000] .Ns.  4878.229757: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35692600
+          &lt;idle&gt;-0     [000] .Ns.  4879.228981: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35693a00
+          &lt;idle&gt;-0     [000] .Ns.  4880.229824: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35692c00
+</pre>
+<pre>
+# echo icmpv6\* &gt; /sys/kernel/debug/tracing/set_ftrace_filter
+# echo function_graph &gt; /sys/kernel/debug/tracing/current_tracer
+# tail -6 trace
+  0)               |  icmpv6_rcv() {
+  0)               |    icmpv6_echo_reply() {
+  0)   0.244 us    |      icmpv6_getfrag();
+  0) + 13.812 us   |      icmpv6_push_pending_frames();
+  0) + 22.602 us   |    }
+  0) + 23.791 us   |  }
+</pre>
+</div>
+
+<div class="slide">
+<h1>trace-cmd</h1>
+<ul>
+	<li>Tool for easier interface to ftrace</li>
+</ul>
+<pre>
+# trace-cmd record -p function -l 'icmp_rcv'
+# trace-cmd report
+CPU 1 is empty
+CPU 2 is empty
+CPU 3 is empty
+cpus=4
+ irq/135-iwlwifi-921   [000] 26996.738342: function:             icmp_rcv
+</pre>
+<pre>
+trace-cmd record -p function_graph -l 'tcp_*'
+</pre>
+</div>
+
+<div class="slide">
+<h1>perf</h1>
+<ul>
+	<li>Perf can monitor certain events, including:</li>
+	<ul>
+		<li>Hardware events: CPU counters</li>
+		<li>Software events: CPU migrations, sched..</li>
+		<li>Tracepoints</li>
+		<li>Dynamic tracing: Kprobes, uprobes</li>
+		<li>Profiling: Collecting statistics</li>
+	</ul>
+</ul>
+<pre>
+# perf list
+
+List of pre-defined events (to be used in -e):
+
+  branch-instructions OR branches                    [Hardware event]
+  branch-misses                                      [Hardware event]
+  cache-misses                                       [Hardware event]
+  cache-references                                   [Hardware event]
+  cpu-cycles OR cycles                               [Hardware event]
+  instructions                                       [Hardware event]
+&hellip;
+# perf stat -e cycles dd if=/dev/zero of=/dev/null count=1000000
+1000000+0 records in
+1000000+0 records out
+512000000 bytes (512 MB, 488 MiB) copied, 1.18161 s, 433 MB/s
+
+ Performance counter stats for 'dd if=/dev/zero of=/dev/null count=1000000':
+
+     3,859,210,000      cycles
+
+       1.182743924 seconds time elapsed
+</pre>
+<ul>
+	<li>Attaching to kprobes creates new event</li>
+</ul>
+<pre>
+# perf probe --add icmpv6_rcv
+Added new event:
+  probe:icmpv6_rcv     (on icmpv6_rcv)
+
+You can now use it in all perf tools, such as:
+
+	perf record -e probe:icmpv6_rcv -aR sleep 1
+
+# perf record -e probe:icmpv6_rcv -aR sleep 1
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.140 MB perf.data (1 samples) ]
+# perf report --stdio
+# To display the perf.data header info, please use --header/--header-only option
+#
+#
+# Total Lost Samples: 0
+#
+# Samples: 1  of event 'probe:icmpv6_rcv'
+# Event count (approx.): 1
+#
+# Overhead  Trace output
+# ........  ............
+#
+   100.00%  (ffffffffb38
+</pre>
+</div>
+
+<div class="slide cover">
+ <div>
+ <img src="images/Logo_RH_RGB_Default.png" alt="RH logo" class="cover" />
+ <br clear="all" />
+ <h1>That's all folks, Thank you!</h1>
+ </div>
+</div>
+
+</body>
+</html>

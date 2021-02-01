@@ -28,9 +28,11 @@
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
  <h2>Agenda</h2>
+ <p>Viktor Malík<br>
+Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
 Manager, Software Engineering, Red Hat<br>
- &copy; February 2019</p>
+ &copy; February 2021</p>
  </div>
 </div>
 
@@ -39,49 +41,48 @@ Manager, Software Engineering, Red Hat<br>
 	<img class="right" alt="FIT logo" src="images/FIT_zakladni_provedeni_loga_barva_EN.png"/>
 	<ul>
 		<li>Code:   IAN</li>
-		<li>Ac.Year:    2019/2020</li>
+		<li>Ac.Year:    2020/2021</li>
 		<li>Term:   Summer</li>
 		<li>Language:   Czech</li>
 		<li>Credits:    4</li>
 		<li>Completion: classified accreditation</li>
-		<li><a href="https://www.fit.vut.cz/study/course/13272/">https://www.fit.vut.cz/study/course/13272/</a></li>
+		<li><a href="https://www.fit.vut.cz/study/course/IAN/">https://www.fit.vut.cz/study/course/IAN/</a></li>
 	</ul>
 </div>
 
 <div class="slide">
 	<h1>Course overview</h1>
 	<ul>
-		<li>Lectures (biweekly)</li>
-			<ul>
-				<li>Wednesday 9:00, A112, even weeks</li>
-			</ul>
-		<li>Computer labs in the Red Hat laboratory (biweekly)</li>
+        <li>Online using Blue Jeans (<a href="https://bluejeans.com/330727952">https://bluejeans.com/330727952</a>)
+        <li>Every Wednesday 9:00 &mdash; 10:50</li>
 		<ul>
-				<li>Friday 9:00, Q305, odd weeks</li>
-				<li>Friday 9:00, Q305, even weeks</li>
-			<li>In groups of 10<li>
+            <li><b>Lectures</b> on even weeks</li>
+            <li><b>Computer (demonstration) exercises</b> on odd weeks</li>
 		</ul>
-		<li>A final test for 40 points</li>
-		<li>3 individual assignments, 20 points each</li>
+        <li>Scoring:</li>
+        <ul>
+            <li>3 individual assignments, 20 points each</li>
+            <li>A final test for 40 points</li>
+        </ul>
 	</ul>
 </div>
 
 <div class="slide">
-	<h1>Draft schedule of lectures</h1>
+	<h1>Draft schedule</h1>
 	<ul>
-		<li><b>Feb 5th</b></li>
-		<li><strike>Feb 12th</strike></li>
-		<li><b>Feb 19th</b></li>
-		<li><strike>Feb 26th (didn't happen)</strike></li>
-		<li><strike>Mar 4th</strike></li>
-		<li><b>Mar 11th</b></li>
-		<li><b>Mar 18th</b></li>
-		<li><strike>Mar 25th</strike></li>
-		<li><b>Apr 1st</b></li>
-		<li><strike>Apr 8th</strike></li>
-		<li><b>Apr 15th</b></li>
-		<li><strike>Apr 22nd</strike></li>
-		<li><b>April 29th</b></li>
+		<li>Feb 10th: lecture</li>
+		<li>Feb 17th: exercise</li>
+		<li>Feb 24th: lecture</li>
+		<li>Mar 3rd: exercise</li>
+		<li>Mar 10th: lecture</li>
+		<li>Mar 17th: exercise</li>
+		<li>Mar 24th: lecture</li>
+		<li>Mar 31th: exercise</li>
+		<li>Apr 7th: lecture</li>
+		<li>Apr 14th: exercise</li>
+		<li>Apr 21th: lecture</li>
+		<li>Apr 28th: exercise</li>
+		<li>May 5th: final test</li>
 	</ul>
 </div>
 
@@ -121,11 +122,18 @@ Manager, Software Engineering, Red Hat<br>
 	<h1>People</h1>
 	<table>
 		<tr>
-			<td>
+			<td width="75%">
 				<ul>
-					<li>Stanislav Kozina <a href="mailto:skozina@redhat.com">&lt;skozina@redhat.com&gt;</a>, Red Hat Czech, s.r.o.</li>
-					<li>Michal Tesar <a href="mailto:mtesar@redhat.com">&lt;mtesar@redhat.com&gt;</a>, Red Hat Czech, s.r.o.</li>
-					<li>Daniel Vacek <a href="mailto:dvacek@redhat.com">&lt;dvacek@redhat.com&gt;</a>, Red Hat Czech, s.r.o.</li>
+                    <li>Lectures</li>
+                    <ul>
+                        <li>Viktor Malík <a href="mailto:vmalik@redhat.com">&lt;vmalik@redhat.com&gt;</a>, Red Hat Czech</li>
+                        <li>Stanislav Kozina <a href="mailto:skozina@redhat.com">&lt;skozina@redhat.com&gt;</a>, Red Hat Czech</li>
+                    </ul>
+                    <li>Exercises</li>
+                    <ul>
+                        <li>Daniel Vacek <a href="mailto:dvacek@redhat.com">&lt;dvacek@redhat.com&gt;</a>, Red Hat Czech</li>
+                        <li>Vratislav Bendel <a href="mailto:vbendel@redhat.com">&lt;vbendel@redhat.com&gt;</a>, Red Hat Czech</li>
+                    </ul>
 				</ul>
 			</td>
 			<td>
@@ -138,19 +146,12 @@ Manager, Software Engineering, Red Hat<br>
 <div class="slide">
 	<h1>Syllabus of lectures</h1>
 	<ol>
-		<li>Computer architectures in general, registers, implicit and explicit stack operations. The x86 and x86_64 computer architectures, common instructions. System V ABI on x86_64 architecture, red zone.</li>
-		<li>Compilation, linking, and running code. Examples of compiler optimizations, stack optimizations (leaf and tail calls, function inlining), linker script, understanding of the Unix binary file (ELF, objdump).</li>
-		<li>Linux crash dump analysis, DWARF debug symbols, using the crash(8) tool.</li>
-		<li>Linux crash dump analysis, understanding kernel Oops, kernel flags, sysrq.</li>
-	</ol>
-</div>
-
-<div class="slide">
-	<h1>Syllabus of lectures (cont)</h1>
-	<ol start=5>
-		<li>Kernel process and memory management, task_struct, vmas, SLAB allocator.</li>
-		<li>Interrupt processing, postponing work, bottom halves, softirqs and tasklets, work queues.</li>
-		<li>Live kernel tracing (SystemTap, ftrace), locks, deadlocks and hangs and their analysis and reconstruction.</li>
+        <li>Introduction. Computer architectures in general, registers, implicit and explicit stack operations. Memory segmentation, paging.</li>
+        <li>The x86 and x86_64 computer architectures, common instructions. System V ABI on x86_64 architecture, red zone. ARM architecture.</li>
+		<li>Code compilation and linking. Understanding the ELF file format. Compiler and stack optimizations.
+        <li>Dynamic linking and running code. Dynamic relocations and interpreter. PIC, ASLR, PIE, linker script. DWARF debug symbols.</li>
+		<li>Live kernel tracing: strace, ltrace, SystemTap, ftrace, perf.</li>
+        <li>BPF (Berkeley Packet Filter), eBPF and its usage in kernel tracing. BCC, bpftrace.</li>
 	</ol>
 </div>
 
@@ -158,9 +159,9 @@ Manager, Software Engineering, Red Hat<br>
 	<h1>Syllabus of computer exercises</h1>
 	<ol>
 		<li>Decomposition of an ELF binary file, decoding its sections, and code disassembling.</li>
+        <li>Program execution tracing using strace, ltrace, gdb.</li>
 		<li>Using the crash(1) tool on Linux.</li>
-		<li>Crash dump analysis of a Linux system on the IA-32 architecture.</li>
-		<li>Crash dump analysis of a Linux system on the AMD64 architecture.</li>
+		<li>Crash dump analysis of a Linux system.</li>
 		<li>System tracing using SystemTap and ftrace.</li>
 		<li>Tracing and analysis of system deadlocks. </li>
 	</ol>
