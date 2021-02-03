@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
 <pre>
 $ gcc -O0 -Wall -c -o test.o test.c
-$ gdb test.o
+$ objdump -d test.o
 (gdb) disassemble main
 Dump of assembler code for function main:
    0x0000000000000000 &lt;+0&gt;:	push   %rbp
