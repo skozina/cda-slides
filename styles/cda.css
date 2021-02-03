@@ -33,12 +33,17 @@ div.slide.cover img.cover {
 #head-logo {
   background: #cc0000;
   width: auto;
-  height: 75%;
+  height: 50%;
+  margin-top: 0.8em;
 }
 
 #head-icon {
   background: #cc0000;
   width: auto;
+}
+
+#fit-logo {
+    width: 30%;
 }
 
 ul li { 
