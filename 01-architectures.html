@@ -1158,6 +1158,348 @@ bar:
 </ul>
 </div>
 
+<div class="slide">
+<h1>Compiler optimizations</h1>
+<ul>
+	<li>Compilers try to be smart on many thing:</li>
+	<ul>
+		<li>Function inlining</li>
+		<li>Tail call / leaf optimizations</li>
+		<li>Remove unused variables</li>
+		<li>Reorder independent operations</li>
+		<li>Align data</li>
+	</ul>
+	<li>Do <em>not</em> confuse compiler reordering with machine reordering!</li>
+	<li>Some things can't be optimized out</li>
+	<ul>
+		<li>External symbols</li>
+		<li>volatile memory access</li>
+	</ul>
+<pre>
+gcc -O[0123]
+</pre>
+</div>
+
+<div class="slide">
+<h1>-O0 optimization example</h1>
+<ul>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O0 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble print_sum
+Dump of assembler code for function print_sum:
+&lt;+0&gt;:	push   %rbp
+&lt;+1&gt;:	mov    %rsp,%rbp
+&lt;+4&gt;:	sub    $0x10,%rsp
+&lt;+8&gt;:	mov    %edi,-0x4(%rbp)
+&lt;+11&gt;:	mov    %esi,-0x8(%rbp)
+&lt;+14&gt;:	mov    -0x4(%rbp),%edx
+&lt;+17&gt;:	mov    -0x8(%rbp),%eax
+&lt;+20&gt;:	add    %edx,%eax
+&lt;+22&gt;:	mov    %eax,%esi
+&lt;+24&gt;:	mov    $0x400610,%edi
+&lt;+29&gt;:	mov    $0x0,%eax
+&lt;+34&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+39&gt;:	nop
+&lt;+40&gt;:	leaveq
+&lt;+41&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O0 optimization example</h1>
+<ul>
+	<li>Stack alignment requirement</li>
+	<li>&nbsp;</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O0 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble print_sum
+Dump of assembler code for function print_sum:
+&lt;+0&gt;:	push   %rbp
+&lt;+1&gt;:	mov    %rsp,%rbp
+&lt;+4&gt;:	<span class="red">sub    $0x10,%rsp</span>
+&lt;+8&gt;:	mov    %edi,-0x4(%rbp)
+&lt;+11&gt;:	mov    %esi,-0x8(%rbp)
+&lt;+14&gt;:	mov    -0x4(%rbp),%edx
+&lt;+17&gt;:	mov    -0x8(%rbp),%eax
+&lt;+20&gt;:	add    %edx,%eax
+&lt;+22&gt;:	mov    %eax,%esi
+&lt;+24&gt;:	mov    $0x400610,%edi
+&lt;+29&gt;:	mov    $0x0,%eax
+&lt;+34&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+39&gt;:	nop
+&lt;+40&gt;:	leaveq
+&lt;+41&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O0 optimization example</h1>
+<ul>
+	<li>Stack alignment requirement</li>
+	<li>Arguments stored on stack</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O0 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble print_sum
+Dump of assembler code for function print_sum:
+&lt;+0&gt;:	push   %rbp
+&lt;+1&gt;:	mov    %rsp,%rbp
+&lt;+4&gt;:	sub    $0x10,%rsp
+&lt;+8&gt;:	<span class="red">mov    %edi,-0x4(%rbp)</span>
+&lt;+11&gt;:	<span class="red">mov    %esi,-0x8(%rbp)</span>
+&lt;+14&gt;:	<span class="red">mov    -0x4(%rbp),%edx</span>
+&lt;+17&gt;:	<span class="red">mov    -0x8(%rbp),%eax</span>
+&lt;+20&gt;:	add    %edx,%eax
+&lt;+22&gt;:	mov    %eax,%esi
+&lt;+24&gt;:	mov    $0x400610,%edi
+&lt;+29&gt;:	mov    $0x0,%eax
+&lt;+34&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+39&gt;:	nop
+&lt;+40&gt;:	leaveq
+&lt;+41&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O1 optimization example</h1>
+<ul>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+	<li>&nbsp;</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O1 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble main
+Dump of assembler code for function main:
+&lt;+0&gt;:	sub    $0x8,%rsp
+&lt;+4&gt;:	mov    $0x9,%esi
+&lt;+9&gt;:	mov    $0x400600,%edi
+&lt;+14&gt;:	mov    $0x0,%eax
+&lt;+19&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+24&gt;:	mov    $0x0,%eax
+&lt;+29&gt;:	add    $0x8,%rsp
+&lt;+33&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O1 optimization example</h1>
+<ul>
+	<li>Function print_sum() inlined!</li>
+	<li>No stack frame created</li>
+	<li>Stack alignment requirement</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O1 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble main
+Dump of assembler code for function main:
+&lt;+0&gt;:	<span class="red">sub    $0x8,%rsp</span>
+&lt;+4&gt;:	mov    $0x9,%esi
+&lt;+9&gt;:	mov    $0x400600,%edi
+&lt;+14&gt;:	mov    $0x0,%eax
+&lt;+19&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+24&gt;:	mov    $0x0,%eax
+&lt;+29&gt;:	add    $0x8,%rsp
+&lt;+33&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>-O1 optimization example</h1>
+<ul>
+	<li>Function print_sum() inlined!</li>
+	<li>Breakpoints in print_sum() don't work</li>
+	<li>print_sum() is not visible in stack trace</li>
+</ul>
+<pre>
+(gdb) b printf
+Breakpoint 1 at 0x400400
+(gdb) run
+Starting program: /home/ersin/temp/test
+
+Breakpoint 1, __printf (format=0x4005f0 "%d\n") at printf.c:28
+28	{
+(gdb) bt
+#0  __printf (format=0x4005f0 "%d\n") at printf.c:28
+#1  0x0000000000400445 in main ()
+</pre>
+<pre>
+$ gdb test
+(gdb) disassemble main
+Dump of assembler code for function main:
+&lt;+0&gt;:	sub    $0x8,%rsp
+&lt;+4&gt;:	mov    $0x9,%esi
+&lt;+9&gt;:	mov    $0x400600,%edi
+&lt;+14&gt;:	mov    $0x0,%eax
+&lt;+19&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+24&gt;:	mov    $0x0,%eax
+&lt;+29&gt;:	add    $0x8,%rsp
+&lt;+33&gt;:	retq
+</pre>
+</div>
+
+<div class="slide">
+<h1>-O2 optimization example</h1>
+<ul>
+	<li>Instruction micro tunning</li>
+</ul>
+<table>
+<tr>
+<td>
+<pre>
+void print_sum(int a, int b) {
+	printf("%d\n", a + b);
+}
+
+int main(int argc, char **argv) {
+	print_sum(5,4);
+	return (0);
+}
+</pre>
+<pre>
+$ gcc --version
+gcc (GCC) 6.2.1 20160916 (Red Hat 6.2.1-2)
+$ gcc -Wall -O2 -otest test.c
+</pre>
+</td>
+<td>
+<pre>
+$ gdb test
+(gdb) disassemble main
+Dump of assembler code for function main:
+&lt;+0&gt;:	sub    $0x8,%rsp
+&lt;+4&gt;:	mov    $0x9,%esi
+&lt;+9&gt;:	mov    $0x4005f0,%edi
+&lt;+14&gt;:	xor    %eax,%eax
+&lt;+16&gt;:	callq  0x400400 &lt;printf@plt&gt;
+&lt;+21&gt;:	xor    %eax,%eax
+&lt;+23&gt;:	add    $0x8,%rsp
+&lt;+27&gt;:	retq
+</pre>
+</td>
+</tr>
+</table>
+</div>
+
 <div class="slide cover">
  <br clear="all" />
  <h1>ARM (AArch)</h1>
