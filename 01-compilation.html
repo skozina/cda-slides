@@ -66,18 +66,18 @@ int main(int argc, char **argv) {
 <pre>
 $ gcc -O0 -Wall -c -o test.o test.c
 $ objdump -d test.o
-(gdb) disassemble main
-Dump of assembler code for function main:
-   0x0000000000000000 &lt;+0&gt;:	push   %rbp
-   0x0000000000000001 &lt;+1&gt;:	mov    %rsp,%rbp
-   0x0000000000000004 &lt;+4&gt;:	sub    $0x10,%rsp
-   0x0000000000000008 &lt;+8&gt;:	mov    %edi,-0x4(%rbp)
-   0x000000000000000b &lt;+11&gt;:	mov    %rsi,-0x10(%rbp)
-   0x000000000000000f &lt;+15&gt;:	mov    $0x0,%edi
-   0x0000000000000014 &lt;+20&gt;:	callq  0x19 &lt;main+25&gt;
-   0x0000000000000019 &lt;+25&gt;:	mov    $0x0,%eax
-   0x000000000000001e &lt;+30&gt;:	leaveq
-   0x000000000000001f &lt;+31&gt;:	retq
+Disassembly of section .text:
+0000000000000000 &lt;main&gt;:
+   0:	55                   	push   %rbp
+   1:	48 89 e5             	mov    %rsp,%rbp
+   4:	48 83 ec 10          	sub    $0x10,%rsp
+   8:	89 7d fc             	mov    %edi,-0x4(%rbp)
+   b:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+   f:	bf 00 00 00 00       	mov    $0x0,%edi
+  14:	e8 00 00 00 00       	callq  19 &lt;main+0x19&gt;
+  19:	b8 00 00 00 00       	mov    $0x0,%eax
+  1e:	c9                   	leaveq
+  1f:	c3                   	retq
 </pre>
 
 <pre>
@@ -100,19 +100,19 @@ int main(int argc, char **argv) {
 
 <pre>
 $ gcc -O0 -Wall -c -o test.o test.c
-$ gdb test.o
-(gdb) disassemble main
-Dump of assembler code for function main:
-   0x0000000000000000 &lt;+0&gt;:	push   %rbp
-   0x0000000000000001 &lt;+1&gt;:	mov    %rsp,%rbp
-   0x0000000000000004 &lt;+4&gt;:	sub    $0x10,%rsp
-   0x0000000000000008 &lt;+8&gt;:	mov    %edi,-0x4(%rbp)
-   0x000000000000000b &lt;+11&gt;:	mov    %rsi,-0x10(%rbp)
-   0x000000000000000f &lt;+15&gt;:	<span class="red">mov    $0x0,%edi</span>
-   0x0000000000000014 &lt;+20&gt;:	<span class="red">callq  0x19 &lt;main+25&gt;</span>
-   0x0000000000000019 &lt;+25&gt;:	mov    $0x0,%eax
-   0x000000000000001e &lt;+30&gt;:	leaveq
-   0x000000000000001f &lt;+31&gt;:	retq
+$ objdump -d test.o
+Disassembly of section .text:
+0000000000000000 &lt;main&gt;:
+   0:	55                   	push   %rbp
+   1:	48 89 e5             	mov    %rsp,%rbp
+   4:	48 83 ec 10          	sub    $0x10,%rsp
+   8:	89 7d fc             	mov    %edi,-0x4(%rbp)
+   b:	48 89 75 f0          	mov    %rsi,-0x10(%rbp)
+   f:	bf 00 00 00 00       	<span class="red">mov    $0x0,%edi</span>
+  14:	e8 00 00 00 00       	<span class="red">callq  19 &lt;main+0x19&gt;</span>
+  19:	b8 00 00 00 00       	mov    $0x0,%eax
+  1e:	c9                   	leaveq
+  1f:	c3                   	retq
 </pre>
 
 <pre>
@@ -779,6 +779,28 @@ Dump of assembler code for function write:
 =&gt; 0x00007ffff7b08c19 <+0>:	mov    $0x1,%eax
    0x00007ffff7b08c1e <+5>:	syscall
 </pre>
+</div>
+
+<div class="slide">
+<h1>Useful commands</h1>
+<ul>
+    <li>objdump &mdash; useful for disassembling</li>
+    <ul>
+        <li>-d &mdash; disassemble the entire .text section</li>
+        <li>--disassemble=&lt;symbol&gt; &mdash; disassemble only &lt;symbol&gt;</li>
+        <li>-d -j &lt;section&gt; &mdash; disassemble contents of &lt;section&gt;</li>
+    </ul>
+    <li>readelf &mdash; display information about ELF files</li>
+    <ul>
+        <li>-h &mdash; display ELF header</li>
+        <li>-S &mdash; list sections</li>
+        <li>-l &mdash; list program headers (segments)</li>
+        <li>-s &mdash; symbols</li>
+        <li>-r &mdash; relocations</li>
+        <li>-d &mdash; .dynamic section</li>
+        <li>-x &lt;section&gt; &mdash; show contents of &lt;section&gt;</li>
+    </ul>
+</ul>
 </div>
 
 <div class="slide cover">
