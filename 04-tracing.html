@@ -46,8 +46,10 @@ Manager, Software Engineering, Red Hat<br>
 	<h1>Agenda</h1>
 	<ul>
 		<li>strace, ltrace</li>
-		<li>Systemtap</li>
+        <li>kprobes</li>
+		<li>SystemTap</li>
 		<li>ftrace</li>
+		<li>perf</li>
 	</ul>
 </div>
 
@@ -66,7 +68,7 @@ Manager, Software Engineering, Red Hat<br>
 	<li>It can also modify the tracee (return value, signal injection!)</li>
 </ul>
 <pre>
-$ strace ./prog &ht; /dev/null
+$ strace ./prog > /dev/null
 execve("./prog", ["./prog"], [/* 47 vars */]) = 0
 brk(NULL)                               = 0x2009000
 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f08d1e08000
@@ -188,20 +190,58 @@ WARNING: function icmpv6_init is in blacklisted section: keyword at trace.stap:1
 <h1>ftrace</h1>
 <ul>
 	<li>Trace interface for set of given tracepoints</li>
-	<li>Allows creating dynamic tracepoints via kprobes</li>
 	<li>Accessible via debugfs</li>
-	<li>Ftrace can also generate call graphs by attached to all kprobes</li>
 	<li>Read <em>Documentation/trace/ftrace.txt</em> and <em>Documentation/trace/kprobetrace.txt</em></li>
+    <li>Basic function tracing:</li>
 </ul>
 <pre>
-# echo 0 &gt; /sys/kernel/debug/tracing/events/kprobes/enable
+# echo icmpv6_rcv > /sys/kernel/debug/tracing/set_ftrace_filter
+# echo function > /sys/kernel/debug/tracing/current_tracer
+# tail /sys/kernel/debug/tracing/trace
+            <idle>-0   [002] ..s1 10213.197669: icmpv6_rcv <-ip6_protocol_deliver_rcu
+            <idle>-0   [002] ..s1 10213.197695: icmpv6_rcv <-ip6_protocol_deliver_rcu
+
+</pre>
+<ul>
+    <li>Turn off and reset by:</li>
+</ul>
+<pre>
+# echo nop > /sys/kernel/debug/tracing/current_tracer
+# echo > /sys/kernel/debug/tracing/set_ftrace_filter
+# echo > /sys/kernel/debug/tracing/trace
+</pre>
+</div>
+
+<div class="slide">
+<h1>ftrace</h1>
+<ul>
+	<li>Allows creating dynamic tracepoints via kprobes</li>
+</ul>
+<pre>
 # echo "p icmpv6_rcv skb=%di" &gt;> /sys/kernel/debug/tracing/kprobe_events
+# cat /sys/kernel/debug/tracing/kprobe_events
+p:kprobes/p_icmpv6_rcv_0 icmpv6_rcv skb=%di
+#
 # echo 1 &gt; /sys/kernel/debug/tracing/events/kprobes/enable
 # tail /sys/kernel/debug/tracing/trace
           &lt;idle&gt;-0     [000] .Ns.  4878.229757: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35692600
           &lt;idle&gt;-0     [000] .Ns.  4879.228981: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35693a00
           &lt;idle&gt;-0     [000] .Ns.  4880.229824: p_icmpv6_rcv_0: (icmpv6_rcv+0x0/0x520) skb=0xffff898a35692c00
 </pre>
+<ul>
+    <li>Stop tracing by:</li>
+</ul>
+<pre>
+# echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
+# echo > /sys/kernel/debug/tracing/kprobe_events
+</pre>
+</div>
+
+<div class="slide">
+<h1>ftrace</h1>
+<ul>
+	<li>Ftrace can also generate call graphs by attached to all kprobes</li>
+</ul>
 <pre>
 # echo icmpv6\* &gt; /sys/kernel/debug/tracing/set_ftrace_filter
 # echo function_graph &gt; /sys/kernel/debug/tracing/current_tracer
