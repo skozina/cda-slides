@@ -56,11 +56,15 @@ table {
 	table-layout: fixed;
 }
 
+table.no-outer-border {
+    border-style: hidden;
+}
+
 table.border tr td,th {
 	border:0.1em solid black;
 }
 
-table.centered tr td {
+table.centered tr td,th {
     text-align: center;
 }
 
@@ -78,6 +82,10 @@ table tr td.border {
 
 table tr td.dark {
 	background-color: #dcdcdc;
+}
+
+table.padded tr th,td {
+    padding: 20px;
 }
 
 img {

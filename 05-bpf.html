@@ -79,13 +79,16 @@ struct sock_fprog bpf = {
 <h1>eBPF</h1>
 <ul>
 	<li>Extension of traditional Berkley Packet Filter (bpf)</li>
-	<li>eBPF extends the machine by providing more registers and more memory for interim operations (4096 bytes)</li>
-	<li>Accesible via new syscall bpf(2)<li>
-	<li>The bytecode is verified by the kernel for safety</li>
+	<li>eBPF extends the machine by providing more registers and more memory for interim operations</li>
+    <li>Accesible via <b>new syscall bpf(2)</b><li>
+    <li>The <b>bytecode is verified</b> by the kernel for safety</li>
 	<ul>
-		<li>Eg. it has to finish -- no loops!</li>
+		<li>Max 1M instructions (previously 4096)</li>
+		<li>Only bounded loops (previously no loops) &mdash; must terminate!</li>
+        <li>No unreachable code</li>
+        <li>...</li>
 	</ul>
-	<li>Introduces eBPF maps for storing and passing data between kernel and userland</li>
+    <li>Introduces <b>eBPF maps</b> for storing and passing data between kernel and userland</li>
 	<li>Also allows calling of few selected kernel functions</li>
 	<ul>
 		<li>such as register_kprobes()</li>
@@ -94,9 +97,9 @@ struct sock_fprog bpf = {
 <pre>
 struct bpf_insn insns[] = {
 	BPF_MOV64_REG(BPF_REG_6, BPF_REG_1), /* -EPERM otherwise? */
-	BPF_LD_ABS(BPF_H, 12), /* r0 = skb-&gt;ipproto */
+	BPF_LD_ABS(BPF_H, 12), /* r0 = eth-&gt;h_proto */
 	BPF_JMP_IMM(BPF_JNE, BPF_REG_0, 0x800, 4),
-	BPF_LD_ABS(BPF_B, 23), /* r0 = skb-&gt;ipproto */
+	BPF_LD_ABS(BPF_B, 23), /* r0 = ip-&gt;protocol */
 	BPF_JMP_IMM(BPF_JNE, BPF_REG_0, 1, 2),
 	BPF_MOV64_IMM(BPF_REG_0, -1),
 	BPF_EXIT_INSN(),
@@ -110,17 +113,154 @@ int ret = setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_BPF, &amp;bpffd, sizeof(bpffd
 </div>
 
 <div class="slide">
-<h1>eBPF program types & maps</h1>
+<h1>BPF vs eBPF</h1>
+<table class="centered border no-outer-border padded">
+<tr>
+  <th></th>
+  <th>BPF</th>
+  <th>eBPF</th>
+</tr>
+<tr>
+  <th>registers</th>
+  <td>A, X</th>
+  <td>R0-R10</th>
+</tr>
+<tr>
+  <th>width</th>
+  <td>32-bit</th>
+  <td>64-bit</th>
+</tr>
+<tr>
+  <th>memory</th>
+  <td>512B scratch pad</th>
+  <td>512B stack<br>unlimited BPF maps</th>
+</tr>
+</table>
+</div>
+
+<div class="slide">
+<h1>LLVM BPF compiler</h1>
 <ul>
-	<li>eBPF allows loading of several types of programs</li>
-	<li>It also allows creation of maps for various types of data</li>
-	<ul>
-		<li>Maps is a generic key-value store</li>
-	</ul>
-	<li>Maps can be accessed from both userland and kernel</li>
+	<li>Clang/LLVM has backend to generate eBPF bytecode</li>
+    <li>Compiles C source into a special ELF file</li>
+    <ul>
+        <li>"Linux BPF" architecture</li>
+        <li>eBPF program is located in special sections (empty .text section)</li>
+    </ul>
+    <li>Sections can be loaded into the kernel using <b>libbpf</b></li>
+    <li>Userspace part can be fairly simple</li>
+</ul>
+<pre>
+// Kernel section
+SEC("kprobe/icmp_rcv")
+int bpf_prog1(struct pt_regs *ctx)
+{
+    struct sk_buff *skb;
+	__u32 len;
+
+	/* non-portable! works for the given kernel only */
+	skb = (struct sk_buff *) PT_REGS_PARM1(ctx);
+	bpf_probe_read_kernel(&len, sizeof(__u32), &skb->len);
+
+	char fmt[] = "skb %p len %d";
+	/* using bpf_trace_printk() for DEBUG ONLY */
+	bpf_trace_printk(fmt, sizeof(fmt), skb, len);
+
+	return 0;
+}
+</pre>
+<pre>
+clang -Wall -O2 -emit-llvm -c kprobes_kern.c -o -| llc -march=bpf -filetype=obj -o kprobes_kern.o
+</pre>
+<pre>
+// Userspace section
+char filename[256];
+snprintf(filename, sizeof(filename), "%s_kern.o", argv[0]);
+
+obj = bpf_object__open_file(filename, NULL);
+&hellip;
+prog = bpf_object__find_program_by_name(obj, "bpf_prog1");
+&hellip;
+bpf_object__load(obj)
+&hellip;
+bpf_program__attach(prog)
+&hellip;
+</pre>
+</div>
+
+<div class="slide">
+<h1>eBPF maps</h1>
+<ul>
+    <li>Generic key-value stores with arbitrary structure</li>
+	<li>Accessible from both userland and kernel</li>
 	<ul>
 		<li>Thus can be used to pass data between the two</li>
 	</ul>
+    <li></li>
+</ul>
+<pre>
+// Kernel part
+struct bpf_map_def SEC("maps") my_map = {
+	.type = BPF_MAP_TYPE_ARRAY,
+	.key_size = sizeof(__uint32_t),
+	.value_size = sizeof(long),
+	.max_entries = 256,
+};
+
+SEC("socket1")
+int bpf_prog1(struct __sk_buff *skb)
+{
+	int index = load_byte(skb, ETH_HLEN + offsetof(struct iphdr, protocol));
+	long *value;
+
+	value = bpf_map_lookup_elem(&my_map, &index);
+	if (value)
+		__sync_fetch_and_add(value, skb->len);
+
+	return 0;
+}
+</pre>
+<pre>
+// Userspace part
+&hellip;
+map_fd = bpf_object__find_map_fd_by_name(obj, "my_map");
+&hellip;
+bpf_map_lookup_elem(map_fd, &key, &tcp_cnt);
+</pre>
+<ul>
+    <li>Maps can have many types:</li>
+</ul>
+<pre>
+enum bpf_map_type {
+   BPF_MAP_TYPE_UNSPEC,
+   BPF_MAP_TYPE_HASH,
+   BPF_MAP_TYPE_ARRAY,
+   BPF_MAP_TYPE_PROG_ARRAY,
+   BPF_MAP_TYPE_PERF_EVENT_ARRAY,
+   BPF_MAP_TYPE_PERCPU_HASH,
+   BPF_MAP_TYPE_PERCPU_ARRAY,
+   BPF_MAP_TYPE_STACK_TRACE, 
+&hellip;
+};
+</pre>
+</div>
+
+<div class="slide">
+<h1>eBPF commands & program types</h1>
+<ul>
+	<li>eBPF allows loading of several types of programs</li>
+    <ul>
+        <li>BPF_PROG_TYPE_SOCKER_FILTER &mdash; classic BPF-like socket filter</li>
+        <li>BPF_PROG_TYPE_KPROBE &mdash; attaching to kprobes</li>
+        <li>BPF_PROG_TYPE_TRACEPOINT &mdash; attaching to ftrace tracepoints</li>
+        <li>BPF_PROG_TYPE_XDP &mdash; eXpress Data Path</li>
+        <li>... and many more</li>
+    </ul>
+    <li>eBPF commands (executed via bpf(2) syscall):</li>
+    <ul>
+        <li>load, attach, and detach eBPF programs</li>
+        <li>access eBPF maps</li>
+    </ul>
 </ul>
 <pre>
 /* BPF syscall commands, see bpf(2) man-page for details. */
@@ -132,13 +272,8 @@ enum bpf_cmd {
 &hellip;
         BPF_PROG_LOAD,
 &hellip;
-};
-enum bpf_prog_type {
-        BPF_PROG_TYPE_UNSPEC,
-        BPF_PROG_TYPE_SOCKET_FILTER,
-        BPF_PROG_TYPE_KPROBE,
-&hellip;
-        BPF_PROG_TYPE_PERF_EVENT,
+        BPF_PROG_ATTACH,
+        BPF_PROG_DETACH,
 &hellip;
 };
 </pre>
@@ -176,63 +311,28 @@ struct bpf_insn insns[] = {
 </div>
 
 <div class="slide">
-<h1>llvm-bpf</h1>
+<h1>bpftool - inspecting BPF programs</h1>
 <ul>
-	<li>Since llvm-3.7 LLVM has backend to generate eBPF bytecode</li>
+    <li>bpftool prog list &mdash; list all loaded BPF programs</li>
+    <li>bpftool prog dump xlated id &lt;ID&gt; &mdash; dump instructions of a BPF program</li>
+    <li>bpftool map list &mdash; list all BPF maps</li>
+    <li>bpftool map dump id &lt;ID&gt; &mdash; dump contents of a BPF map</li>
 </ul>
-<pre>
-#define SEC(NAME) __attribute__((section(NAME), used))
-
-struct bpf_map_def SEC("maps") my_map = {
-        .type = BPF_MAP_TYPE_ARRAY,
-        .key_size = sizeof(__uint32_t),
-        .value_size = sizeof(long),
-        .max_entries = 256,
-};
-
-SEC("kprobe/icmp_rcv")
-int bpf_prog1(struct pt_regs *ctx)
-{
-	struct sk_buff *skb;
-	int len;
-	int key = 0;
-
-	/* non-portable! works for the given kernel only */
-	skb = (struct sk_buff *) PT_REGS_PARM1(ctx);
-	len = _(skb-&gt;len);
-
-        value = bpf_map_lookup_elem(&my_map, &index);
-        if (value)
-                __sync_fetch_and_add(value, len);
-
-	return 0;
-}
-</pre>
-<pre>
-clang -Wall -O2 -emit-llvm -c kprobes_kern.c -o -| llc -march=bpf -filetype=obj -o kprobes_kern.o
-</pre>
-<ul>
-	<li>Linux tree contains <em>samples/bpf/bpf_load.c</em> which can load these sections to the kernel</li>
-	<li>Thus corresponding userland code can be fairly simple</li>
-</ul>
-<pre>
-char filename[256];
-
-snprintf(filename, sizeof(filename), "%s_kern.o", argv[0]);
-(void) load_bpf_file(filename);
-&hellip;
-long long value;
-int key = 0;
-
-bpf_map_lookup_elem(map_fd[0], &amp;key, &amp;value);
-</pre>
 </div>
 
 <div class="slide">
 <h1>BPF Compiler Collection (bcc)</h1>
 <ul>
-	<li>bcc offers python binding</li>
-	<li>Similar structures as with using llvm (still uses llvm for compilation</li>
+	<li>Offers Python binding</li>
+	<li>Similar structures as with using LLVM (still uses LLVM for compilation)</li>
+    <li>BPF program is written in C and embedded as a string</li>
+    <ul>
+        <li>Various helper macros (e.g. map definition) can be used</li>
+    </ul>
+    <li>Userspace part is written in Python</li>
+    <ul>
+        <li>Has simple access to BPF maps, ...
+    </ul>
 </ul>
 <pre>
 b = BPF(text="""
@@ -259,9 +359,14 @@ while 1:
 </div>
 
 <div class="slide">
-<h1>BPF Compiler Collection (bcc) bitehist</h1>
+<h1>BPF Compiler Collection (bcc)</h1>
 <ul>
-	<li>bcc has also some nice extensions</li>
+    <li>Comes with a number of pre-written tools</li>
+    <ul>
+        <li>Located in /usr/share/bcc/tools</li>
+    </ul>
+	<li>Also has some nice extensions (e.g. data aggregation using histograms)</li>
+    <li>Example: print histogram of block operation sizes</li>
 </ul>
 <pre>
 # Copyright (c) 2015 Brendan Gregg.
@@ -277,7 +382,7 @@ b = BPF(text="""
 #include <uapi/linux/ptrace.h>
 #include <linux/blkdev.h>
 BPF_HISTOGRAM(dist);
-int kprobe__blk_account_io_completion(struct pt_regs *ctx, struct request *req)
+int kprobe__blk_account_io_start(struct pt_regs *ctx, struct request *req)
 {
 	dist.increment(bpf_log2l(req-&gt;__data_len / 1024));
 	return 0;
@@ -314,6 +419,15 @@ Tracing... Hit Ctrl-C to end.
 
 <div class="slide">
 <h1>High level eBPF language: bpftrace</h1>
+<ul>
+    <li>Single bpftrace program for both kernel (BPF) and userspace part</li>
+    <li>Allows to write simple one-liner scripts for fast tracing</li>
+    <li>Offers various probes (tracepoints, kprobes, hardware counters, ...), data aggregations, ...</li>
+    <li>Similarly to BCC, comes with a number of pre-written tools</li>
+    <ul>
+        <li>See /usr/share/bpftrace/tools</li>
+    </ul>
+</ul>
 <pre>
 # bpftrace -e 'kprobe:__x64_sys_* { @[func] = count() }'
 
@@ -332,6 +446,33 @@ icmp_packet
 icmp_rcv(0xffff8f2303de1b00)
 icmp_rcv(0xffff8f2303de1b00)
 &hellip;
+</pre>
+</div>
+
+<div class="slide">
+<h1>BPF Type Format (BTF)</h1>
+<ul>
+    <li>Compact format for kernel <b>debugging information</b></li>
+    <ul>
+        <li>Contains definitions of all kernel types, including functions</li>
+    </ul>
+    <li>Generated from DWARF (by deduplication) using pahole(1)</li>
+    <ul>
+        <li>DWARF: 196MB</li>
+        <li>BTF: 4.5MB</li>
+    </ul>
+    <li>Thanks to the small size, BTF can be embedded in the kernel by default</li>
+    <li>Usage:</li>
+    <ul>
+        <li>Allows BPFtrace to directly access function arguments by name</li>
+    </ul>
+</ul>
+<pre>
+# bpftrace -e 'kfunc:icmp_rcv { printf("Ping of size %d\n", args->skb->len); }'
+Attaching 1 probe...
+Ping of size 64
+Ping of size 64
+^C
 </pre>
 </div>
 
