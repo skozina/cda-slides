@@ -29,10 +29,10 @@
  <h1>Binary Code Analysis</h1>
  <h2>Live Kernel Tracing</h2>
  <p>Viktor Malík<br>
-Software Engineer, Red Hat<br></p>
+    Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
-Manager, Software Engineering, Red Hat<br>
- &copy; January 2021</p>
+    Manager, Software Engineering, Red Hat<br></p>
+ <p>&copy; January 2022</p>
  </div>
 </div>
 
@@ -125,6 +125,7 @@ static int handler_pre(struct kprobe *p, struct pt_regs *regs)
 static int __init kprobe_init(void)
 {
 	int ret;
+	kp.symbol_name = "icmpv6_rcv";
 	kp.pre_handler = handler_pre;
 	kp.post_handler = handler_post;
 	kp.fault_handler = handler_fault;
@@ -151,7 +152,7 @@ static int __init kprobe_init(void)
 # stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s\n", ppfunc()); }'
 -&gt; icmpv6_rcv
 -&gt; icmpv6_rcv
-# stap -v -e 'probe kernel.function("icmp_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), ulong_arg(1)); }'
+# stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), ulong_arg(1)); }'
 -&gt; icmp_rcv(0xffff8f2316224200)
 -&gt; icmp_rcv(0xffff8f2316224700)
 </pre>
@@ -261,7 +262,7 @@ p:kprobes/p_icmpv6_rcv_0 icmpv6_rcv skb=%di
 	<li>Tool for easier interface to ftrace</li>
 </ul>
 <pre>
-# trace-cmd record -p function -l 'icmp_rcv'
+# trace-cmd record -p function -l 'icmpv6_rcv'
 # trace-cmd report
 CPU 1 is empty
 CPU 2 is empty

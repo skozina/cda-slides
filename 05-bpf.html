@@ -29,10 +29,10 @@
  <h1>Binary Code Analysis</h1>
  <h2>eBPF</h2>
  <p>Viktor Malík<br>
-Software Engineer, Red Hat<br></p>
+    Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
-Manager, Software Engineering, Red Hat<br>
- &copy; January 2021</p>
+    Manager, Software Engineering, Red Hat<br><p>
+ <p>&copy; January 2022</p>
  </div>
 </div>
 
@@ -152,7 +152,7 @@ int ret = setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_BPF, &amp;bpffd, sizeof(bpffd
 </ul>
 <pre>
 // Kernel section
-SEC("kprobe/icmp_rcv")
+SEC("kprobe/icmpv6_rcv")
 int bpf_prog1(struct pt_regs *ctx)
 {
     struct sk_buff *skb;
@@ -339,7 +339,7 @@ struct bpf_insn insns[] = {
 b = BPF(text="""
 #include &lt;linux/skbuff.h&gt;
 BPF_HASH(icmp);
-int kprobe__icmp_rcv(struct pt_regs *ctx, struct sk_buff *skb)
+int kprobe__icmpv6_rcv(struct pt_regs *ctx, struct sk_buff *skb)
 {
         u64 zero = 0, *value, key = 0;
 
@@ -431,7 +431,6 @@ Tracing... Hit Ctrl-C to end.
 </ul>
 <pre>
 # bpftrace -e 'kprobe:__x64_sys_* { @[func] = count() }'
-
 Attaching 342 probes...
 &hellip;
 @[__x64_sys_kill]: 1
@@ -439,13 +438,12 @@ Attaching 342 probes...
 @[__x64_sys_shutdown]: 1
 </pre>
 <pre>
-# bpftrace -e 'kprobe:icmp_* { printf("%s\n", func); } kprobe:icmp_rcv { printf("%s(%p)\n", func, arg0); }'
-icmp_invert_tuple
-icmp_invert_tuple
-icmp_pkt_to_tuple
-icmp_packet
-icmp_rcv(0xffff8f2303de1b00)
-icmp_rcv(0xffff8f2303de1b00)
+# bpftrace -e 'kprobe:icmpv6_* { printf("%s\n", func); } kprobe:icmpv6_rcv { printf("%s(%p)\n", func, arg0); }'
+Attaching 21 probes...
+icmpv6_push_pending_frames
+icmpv6_pkt_to_tuple
+icmpv6_rcv(0xffff92056d690c00)
+icmpv6_rcv(0xffff92056d690c00)
 &hellip;
 </pre>
 </div>
@@ -469,7 +467,7 @@ icmp_rcv(0xffff8f2303de1b00)
     </ul>
 </ul>
 <pre>
-# bpftrace -e 'kfunc:icmp_rcv { printf("Ping of size %d\n", args->skb->len); }'
+# bpftrace -e 'kfunc:icmpv6_rcv { printf("Ping of size %d\n", args->skb->len); }'
 Attaching 1 probe...
 Ping of size 64
 Ping of size 64
