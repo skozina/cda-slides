@@ -27,7 +27,7 @@
  <img src="images/Logo-RedHat-A-White-RGB.png" alt="RH logo" class="cover" />
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
- <h2>Compilation, linking and running code</h2>
+ <h2>Compilation, linking, and running code</h2>
  <p>Viktor Malík<br>
     Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
@@ -39,7 +39,7 @@
 <div class="slide">
 <h1>Agenda</h1>
 <ul>
-	<li>Compilation, linking, and running code.</li>
+	<li>Compilation, linking, and running code</li>
 	<li>Understanding of the Unix binary file (ELF, objdump)</li>
     <li>Relocations in binary files</li>
     <li>PIC, PIE, ASLR</li>
@@ -123,9 +123,9 @@ $ stat test.o
 </div>
 
 <div class="slide">
-<h1>ELF file format</h1>
+<h1>ELF File Format</h1>
 <ul>
-	<li>Executable and Linkable format</li>
+	<li>Executable and Linkable Format</li>
 	<li>Designed for access through memory mapping</li>
 	<li>Allows for two views of the binary data:</li>
 	<ul>
@@ -215,7 +215,7 @@ Key to Flags:
 <div class="slide">
 <h1>ELF Section Header</h1>
 	<ul>
-		<li>Contains Offset and size of each of the sections</li>
+		<li>Contains offset and size of each of the sections</li>
 	</ul>
 	<ul>
 		<li><em>.text</em> &mdash; Program code</li>
@@ -244,7 +244,7 @@ Relocation section '.rela.text' at offset 0x1a8 contains 2 entries:
 </div>
 
 <div class="slide">
-<h1>Symbol table</h1>
+<h1>Symbol Table</h1>
 <pre>
 $ readelf -s test.o
 
@@ -284,7 +284,7 @@ Hex dump of section '.rodata':
 </div>
 
 <div class="slide">
-<h1>Arbitrary sections</h1>
+<h1>Arbitrary Sections</h1>
 <pre>
 $ cat test.c
 const char my_section[] __attribute__((section(".my_section"))) = "Very cool stuff!";
@@ -395,7 +395,7 @@ Program Headers:
 <div class="slide">
 <h1>ELF Program Header</h1>
 	<ul>
-		<li>Contains Permissions, Offset and size of each of the segments</li>
+		<li>Contains permissions, offset and size of each of the segments</li>
 	</ul>
 	<ul>
 		<li><em>INTERP</em> &mdash; Path to the dynamic interpreter, ld-linux-x86_64.so</li>
@@ -409,7 +409,7 @@ Program Headers:
 </div>
 
 <div class="slide">
-<h1>Relocations in linked binary</h1>
+<h1>Relocations in Linked Binary</h1>
 	<ul>
 		<li>Static linking</li>
         <ul>
@@ -460,7 +460,7 @@ Relocation section '.rela.plt' at offset 0x3b0 contains 1 entries:
 </div>
 
 <div class="slide">
-<h1>Dynamic relocations example</h1>
+<h1>Dynamic Relocations Example</h1>
 <p>
 <a href="https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html">https://www.technovelty.org/linux/plt-and-got-the-key-to-code-sharing-and-dynamic-libraries.html</a>
 </p>
@@ -589,7 +589,7 @@ Dump of assembler code for function _start:
 </div>
 
 <div class="slide">
-<h1>Running code</h1>
+<h1>Running Code</h1>
 <ul>
 	<li>The kernel does:</li>
 	<ul>
@@ -597,15 +597,16 @@ Dump of assembler code for function _start:
 		<li>Zeros out the NOBITS sections, eg. .bss</li>
 		<li>Examine if there's INTERP segment</li>
 		<ul>
-		<li>If yes it maps this binary in the memory as well</li>
+		<li>If yes, it maps this binary in the memory as well</li>
 		</ul>
+		<!-- This looks confusing to me, since the rest describes what happens at exec, which does not create a new process -->
 		<li>Creates a new process with given start address</li>
         <li>Executes <b>dynamic interpreter</b></li>
 	</ul>
 </div>
 
 <div class="slide">
-<h1>Dynamic interpreter</h1>
+<h1>Dynamic Interpreter</h1>
 <ul>
     <li>Loads in all binaries listed in the DYNAMIC segment</li>
     <ul>
@@ -714,11 +715,12 @@ $ ldd test
 	<li>Linker can further make .text, .data and .rodata located randomly</li>
 	<ul>
 		<li>So ASLR works for .text, .data and .rodata</li>
+		<!-- This is confusing, the linker does not enable ASLR, it only enables the executable to be randomized with it enabled -->
 		<li>Linker option -pie tells linker to enable ASLR for .text and .data</li>
 	</ul>
 	<li>-pie causes ELF type to switch from EXEC (executable) to DYN (shared object file)</li>
 	<li>Link address is set to 0 (determined by dynamic interpret)</li>
-	<li>The dynamic interpret distinguishes libraries and executables based on INTERP segment</li>
+	<li>The dynamic interpreter distinguishes libraries and executables based on INTERP segment</li>
 </ul>
 </div>
 
@@ -745,7 +747,7 @@ $ readelf -l /bin/sleep
 </div>
 
 <div class="slide">
-<h1>Linker script</h1>
+<h1>Linker Script</h1>
 <ul>
 	<li>Describes how sections should be linked to segments</li>
 	<li>Describes virtual memory layout of the resulting binary</li>
@@ -764,9 +766,9 @@ SECTIONS
 </div>
 
 <div class="slide">
-<h1>System call</h1>
+<h1>System Call</h1>
 <ul>
-	<li>The way userland application requests service from the kernel</li>
+	<li>The way a userland application requests service from the kernel</li>
 	<li>On Intel typically done by <em>int 0x80</em> or <em>syscall/sysret</em> instruction</li>
 </ul>
 <pre>
@@ -782,7 +784,7 @@ Dump of assembler code for function write:
 </div>
 
 <div class="slide">
-<h1>Useful commands</h1>
+<h1>Useful Commands</h1>
 <ul>
     <li>objdump &mdash; useful for disassembling</li>
     <ul>

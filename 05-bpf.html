@@ -169,6 +169,7 @@ int bpf_prog1(struct pt_regs *ctx)
 	return 0;
 }
 </pre>
+<!-- Why not clang -target bpf ...? -->
 <pre>
 clang -Wall -O2 -emit-llvm -c kprobes_kern.c -o -| llc -march=bpf -filetype=obj -o kprobes_kern.o
 </pre>
@@ -282,6 +283,7 @@ enum bpf_cmd {
 <div class="slide">
 <h1>eBPF functions</h1>
 <ul>
+	<!-- Maybe mention that these functions are called BPF helpers and are listed in bpf-helpers(7)? -->
 	<li>eBPF instructions can be used to call certain specific functions</li>
 </ul>
 <pre>

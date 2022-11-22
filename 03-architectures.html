@@ -62,9 +62,16 @@
 	<h1>History</h1>
 	<ul>
 		<li>1978: Intel 8086, 16bit, 20bit addressing, only real mode</li>
+		<!-- 286 has protected segments, not paging, that came with 386 -->
 		<li>1982: Intel 80286, 16bit, 24bit addressing, Protected
 			mode, MMU (Paging!)</li>
+		<!-- - the spelling IA-32 and IA-64 is official and more common, although both are used
+		<!-- - "known as" might be confusing, since 80386 is a CPU series, IA-32 is its architecture,
+                       and also the architecture of later CPUs like 486, Pentium etc.
+                     - IA-32 is also known as i(3|4|5|6)86 in GNU/Linux context, perhaps that would be worth
+                       mentioning here  -->
 		<li>1985: Intel 80386, 32bit, known as IA32 (x86)</li>
+		<!-- Might be worth mentioning it is officially called Intel 64 by Intel -->
 		<li>2003: AMD Athlon 64, 64bit, 40bit addressing, known as AMD64 (x86_64)</li>
 			<ul>
 				<li>Do <em>NOT</em> confuse with IA64!</li>
@@ -338,11 +345,13 @@ int a = 0x12345678;
 	</ul>
 	<li>VM is mapped to <em>Physical Memory</em></li>
 	<ul>
-		<li>PM is non-contiguous too (PCI space, SMM, &hellip;</li>
+		<li>PM is non-contiguous too (PCI space, SMM, &hellip;)</li>
 		<li>Called <em>Physical Address</em></li>
 	</ul>
 	<li>x86 supports two modes of VMM:</li>
 	<ul>
+		<!-- Actually, it's the linear adress space that is split between segments,
+		     since 386 segmentation happens before paging, as shown on one of the next slides -->
 		<li><em>Segmentation</em> - whole PM split between </em>segments</em></li>
 		<li><em>Paging</em> - Each Virtual Page is mapped to given Physical Page</li>
 		<li>Segmentation can't be turned off!</li>
@@ -356,10 +365,10 @@ int a = 0x12345678;
 <div class="slide">
 <h1>Real Mode (8086) Segmentation</h1>
 <ul>
-	<li>16 bit registers, 20bit addressing</li>
+	<li>16bit registers, 20bit addressing</li>
 	<li>Segment registers CS, DS, ES, GS</li>
-	<li>16 bit segment, 16 bit offset</li>
-	<li>20 bit address = segment &lt;&lt; 4 + offset</li>
+	<li>16bit segment, 16bit offset</li>
+	<li>20bit address = segment &lt;&lt; 4 + offset</li>
 	<li>4096 combinations to compute the same physical address</li>
 </ul>
 <table border="1">
@@ -381,6 +390,7 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
+<!-- This is 80386 protected mode, not 80286, since it has pages -->
 <h1>Protected Mode (80286) Memory Management</h1>
 <img height=70% alt="x86 VMM" src="images/x86-vmm.png"/>
 <p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
@@ -619,8 +629,8 @@ mov    0x4(%rdi,%rax,8),%esi
 <div class="slide">
 <h1>Conditionals</h1>
 <ul>
-	<li><em>cmp</em> - Subtract two operands, discrard result, set flags register</li>
-	<li><em>test</em> - And two operands, discrad result, set flags register</li>
+	<li><em>cmp</em> - Subtract two operands, discard result, set flags register</li>
+	<li><em>test</em> - And two operands, discard result, set flags register</li>
 	<li><em>jmp</em> - Unconditional jump</li>
 	<li><em>je, jnz, &hellip;</em> - Jump based on flags register</li>
 </ul>
@@ -1161,7 +1171,7 @@ bar:
 <div class="slide">
 <h1>Compiler optimizations</h1>
 <ul>
-	<li>Compilers try to be smart on many thing:</li>
+	<li>Compilers try to be smart on many things:</li>
 	<ul>
 		<li>Function inlining</li>
 		<li>Tail call / leaf optimizations</li>
