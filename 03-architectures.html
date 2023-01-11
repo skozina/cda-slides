@@ -2,7 +2,7 @@
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-  <title>Binary Code Analysis - Agenda</title>
+  <title>Binary Code Analysis - Architectures</title>
   <meta name="copyright"
     content="Copyright &#169; 2021 Stanislav Kozina <skozina@redhat.com>, Viktor Malik <vmalik@redhat.com>" />
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -62,19 +62,18 @@
 	<h1>History</h1>
 	<ul>
 		<li>1978: Intel 8086, 16bit, 20bit addressing, only real mode</li>
-		<!-- 286 has protected segments, not paging, that came with 386 -->
-		<li>1982: Intel 80286, 16bit, 24bit addressing, Protected
-			mode, MMU (Paging!)</li>
-		<!-- - the spelling IA-32 and IA-64 is official and more common, although both are used
-		<!-- - "known as" might be confusing, since 80386 is a CPU series, IA-32 is its architecture,
-                       and also the architecture of later CPUs like 486, Pentium etc.
-                     - IA-32 is also known as i(3|4|5|6)86 in GNU/Linux context, perhaps that would be worth
-                       mentioning here  -->
-		<li>1985: Intel 80386, 32bit, known as IA32 (x86)</li>
-		<!-- Might be worth mentioning it is officially called Intel 64 by Intel -->
-		<li>2003: AMD Athlon 64, 64bit, 40bit addressing, known as AMD64 (x86_64)</li>
+		<li>1982: Intel 80286, 16bit, 24bit addressing, protected
+			mode, MMU</li>
+		<li>1985: Intel 80386, 32bit</li>
+		<ul>
+			<li>Introduced the <b>IA-32</b> architecture</li>
+			<li>Commonly called <b>x86</b>, which otherwise refers to 8086's and 80286's architecture, too</li>
+			<li>Various versions called i386, i486, i586, i686 in GNU/Linux context</li>
+		</ul>
+		<li>2003: AMD Athlon 64, 64bit, 40bit addressing</li>
 			<ul>
-				<li>Do <em>NOT</em> confuse with IA64!</li>
+				<li>Introduced the <b>AMD64</b> (also <b>x86_64</b>, Intel 64) architecture</li>
+				<li>Do <em>NOT</em> confuse with IA-64!</li>
 				<li>That's Intel Itanium</li>
 			</ul>
 		<li>Today: Intel Comet Lake, 64bit, 46bit addressing</li>
@@ -104,7 +103,7 @@
 </div>
 
 <div class="slide">
-<h1>Variable instruction size</h1>
+<h1>Variable Instruction Size</h1>
 <pre>
 (gdb) disassemble /r pthread_create
 Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
@@ -350,10 +349,8 @@ int a = 0x12345678;
 	</ul>
 	<li>x86 supports two modes of VMM:</li>
 	<ul>
-		<!-- Actually, it's the linear adress space that is split between segments,
-		     since 386 segmentation happens before paging, as shown on one of the next slides -->
-		<li><em>Segmentation</em> - whole PM split between </em>segments</em></li>
-		<li><em>Paging</em> - Each Virtual Page is mapped to given Physical Page</li>
+		<li><em>Segmentation</em> - linear space split between </em>segments</em></li>
+		<li><em>Paging</em> - each virtual page is mapped to given Physical Page</li>
 		<li>Segmentation can't be turned off!</li>
 		<ul>
 		<li>&hellip; but can be made transparent</li>
@@ -390,8 +387,7 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-<!-- This is 80386 protected mode, not 80286, since it has pages -->
-<h1>Protected Mode (80286) Memory Management</h1>
+<h1>Protected Mode (80386) Memory Management</h1>
 <img height=70% alt="x86 VMM" src="images/x86-vmm.png"/>
 <p class="right grey">Source: Intel Software Developer's Manual, Volume 3A, Figure 3-1</p>
 </div>
@@ -468,7 +464,7 @@ int a = 0x12345678;
 </div>
 
 <div class="slide">
-<h1>Per CPU data</h1>
+<h1>Per CPU Data</h1>
 <pre>
 asmlinkage __visible void __sched schedule(void)
 {
@@ -499,7 +495,7 @@ crash&gt; dis schedule
 </div>
 
 <div class="slide">
-<h1>Flags and features register</h1>
+<h1>Flags and Features Register</h1>
 <ul>
 	<li>64-bit %rflags</li>
 	<ul>
@@ -544,7 +540,7 @@ crash&gt; dis schedule
 </div>
 
 <div class="slide">
-<h1>Assembly syntax</h1>
+<h1>Assembly Syntax</h1>
 <ul>
 	<li>Intel syntax vs. AT&amp;T syntax</li>
 	<li>We'll use the latter because that's what *NIX tools do</li>
@@ -574,7 +570,7 @@ ADD ESI, 0x1000
 </div>
 
 <div class="slide">
-<h1>Addressing modes</h1>
+<h1>Addressing Modes</h1>
 <ul>
 	<li>x86 allows indirect addressing with offset, index and scale</li>
 	<li>VMA = offset(%reg, %index, scale)</li>
@@ -588,7 +584,7 @@ ADD ESI, 0x1000
 </div>
 
 <div class="slide">
-<h1>Addressing modes - Example</h1>
+<h1>Addressing Modes - Example</h1>
 <p>VMA = offset(%reg, %index, scale)</p>
 <pre>
 struct foo {
@@ -609,7 +605,7 @@ mov    0x4(%rdi,%rax,8),%esi
 </div>
 
 <div class="slide">
-<h1>Basic load/store instructions</h1>
+<h1>Basic Load/Store Instructions</h1>
 <ul>
 	<li><em>mov</em> - Move data between registers and/or memory</li>
 	<li><em>nop</em> - Do nothing, 1 byte, actually xchg %eax, %eax</li>
@@ -618,7 +614,7 @@ mov    0x4(%rdi,%rax,8),%esi
 </div>
 
 <div class="slide">
-<h1>Basic arithmetics instructions</h1>
+<h1>Basic Arithmetic Instructions</h1>
 <ul>
 	<li><em>add, sub</em> - Basic increment, decrement, sets flags register</li>
 	<li><em>and, or, xor</em> - Bit operations, sets flags register</li>
@@ -645,7 +641,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 </div>
 
 <div class="slide">
-<h1>Stack instructions</h1>
+<h1>Stack Instructions</h1>
 <ul>
 	<li><em>push</em> - Decrement the %rsp <em>and</em> store the value</li>
 	<li><em>pop</em> - Load the value <em>and</em> increment the %rsp</li>
@@ -686,7 +682,7 @@ jne    0x7f3efa731efe &lt;pthread_create@@GLIBC_2.2.5+1662&gt;
 </div>
 
 <div class="slide">
-<h1>Structure padding</h1>
+<h1>Structure Padding</h1>
 <pre>
 struct foo {
 	char a;
@@ -699,7 +695,7 @@ printf("offsetof(struct foo, b): %d\n", &((struct foo *)0)->b);
 </div>
 
 <div class="slide">
-<h1>Structure padding</h1>
+<h1>Structure Padding</h1>
 <pre>
 struct foo {
 	char a;
@@ -716,7 +712,7 @@ offsetof(struct foo, b): 4
 </div>
 
 <div class="slide">
-<h1>Function prolog</h1>
+<h1>Function Prolog</h1>
 <ul>
 	<li>&nbsp;</li>
 	<li>&nbsp;</li>
@@ -735,7 +731,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function prolog</h1>
+<h1>Function Prolog</h1>
 <ul>
 	<li>Create stack frame</li>
 	<li>&nbsp;</li>
@@ -754,7 +750,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function prolog</h1>
+<h1>Function Prolog</h1>
 <ul>
 	<li>Create stack frame</li>
 	<li>Store non-volatile registers</li>
@@ -773,7 +769,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function epilog</h1>
+<h1>Function Epilog</h1>
 <ul>
 	<li>&nbsp;</li>
 	<li>&nbsp;</li>
@@ -793,7 +789,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function epilog</h1>
+<h1>Function Epilog</h1>
 <ul>
 	<li>Clean the stack variables</li>
 	<li>&nbsp;</li>
@@ -813,7 +809,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function epilog</h1>
+<h1>Function Epilog</h1>
 <ul>
 	<li>Clean the stack variables</li>
 	<li>Set the return value</li>
@@ -833,7 +829,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Function epilog</h1>
+<h1>Function Epilog</h1>
 <ul>
 	<li>Clean the stack variables</li>
 	<li>Set the return value</li>
@@ -853,7 +849,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Red zone</h1>
+<h1>Red Zone</h1>
 <ul>
 <li>A reserved area below (out) the top of the stack</li>
 <li>All other stacks (exception, trap) have to skip this area</li>
@@ -863,7 +859,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Stack operation</h1>
+<h1>Stack Operation</h1>
 <ul>
 	<li><em>Stack pointer (%rsp)</em> points to the last item on the stack</li>
 	<li><em>Frame pointer (%rbp)</em> optionally points to the base of the stack frame.</li>
@@ -872,7 +868,7 @@ Dump of assembler code for function pthread_create@@GLIBC_2.2.5:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -903,7 +899,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -935,7 +931,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -968,7 +964,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -1001,7 +997,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -1035,7 +1031,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -1070,7 +1066,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -1105,7 +1101,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Stack operation animation</h1>
+<h1>Stack Operation Animation</h1>
 <div class="table">
 <div>
 <pre>
@@ -1140,7 +1136,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Things to remember</h1>
+<h1>Things To Remember</h1>
 <ul>
 	<li>The %rip address stored by <em>call</em> instruction points to the instruction after the call</li>
 	<li>This address is used by debuggers to restore the call stack</li>
@@ -1158,7 +1154,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Multiple stacks</h1>
+<h1>Multiple Stacks</h1>
 <ul>
 	<li>On privilege level switch the new stack is loaded from TSS</li>
 	<li>Kernel has its own stack</li>
@@ -1169,7 +1165,7 @@ bar:
 </div>
 
 <div class="slide">
-<h1>Compiler optimizations</h1>
+<h1>Compiler Optimizations</h1>
 <ul>
 	<li>Compilers try to be smart on many things:</li>
 	<ul>
@@ -1191,7 +1187,7 @@ gcc -O[0123]
 </div>
 
 <div class="slide">
-<h1>-O0 optimization example</h1>
+<h1>-O0 Optimization Example</h1>
 <ul>
 	<li>&nbsp;</li>
 	<li>&nbsp;</li>
@@ -1242,7 +1238,7 @@ Dump of assembler code for function print_sum:
 </div>
 
 <div class="slide">
-<h1>-O0 optimization example</h1>
+<h1>-O0 Optimization Example</h1>
 <ul>
 	<li>Stack space allocation</li>
 	<li>&nbsp;</li>
@@ -1293,7 +1289,7 @@ Dump of assembler code for function print_sum:
 </div>
 
 <div class="slide">
-<h1>-O0 optimization example</h1>
+<h1>-O0 Optimization Example</h1>
 <ul>
 	<li>Stack space allocation</li>
 	<li>Arguments stored on stack</li>
@@ -1344,7 +1340,7 @@ Dump of assembler code for function print_sum:
 </div>
 
 <div class="slide">
-<h1>-O1 optimization example</h1>
+<h1>-O1 Optimization Example</h1>
 <ul>
 	<li>&nbsp;</li>
 	<li>&nbsp;</li>
@@ -1389,7 +1385,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>-O1 optimization example</h1>
+<h1>-O1 Optimization Example</h1>
 <ul>
 	<li>Function print_sum() inlined!</li>
 	<li>No stack frame created</li>
@@ -1434,7 +1430,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>-O1 optimization example</h1>
+<h1>-O1 Optimization Example</h1>
 <ul>
 	<li>Function print_sum() inlined!</li>
 	<li>Breakpoints in print_sum() don't work</li>
@@ -1468,7 +1464,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>-O2 optimization example</h1>
+<h1>-O2 Optimization Example</h1>
 <ul>
 	<li>Instruction micro tunning</li>
 </ul>
@@ -1516,7 +1512,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>CPU modes</h1>
+<h1>CPU Modes</h1>
 <ul>
     <li>User &mdash; non-privileged</li>
     <li>FIQ &mdash; fast interrupt handling</li>
@@ -1529,7 +1525,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>AArch32 register shadowing</h1>
+<h1>AArch32 Register Shadowing</h1>
 <table class="border centered">
     <tr>
         <th>usr</th>
@@ -1588,11 +1584,11 @@ Dump of assembler code for function main:
 
 <div class="slide cover">
  <br clear="all" />
- <h1>Other architectures</h1>
+ <h1>Other Architectures</h1>
 </div>
 
 <div class="slide">
-<h1>Branch delay slot</h1>
+<h1>Branch Delay Slot</h1>
 <ul>
 	<li>One instruction after the current one is <em>always</em> executed</li>
 	<li>Even if the preceeding instruction has jumped elsewhere</li>
@@ -1602,7 +1598,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>TLB miss</h1>
+<h1>TLB Miss</h1>
 <ul>
 	<li><em>TLB</em> - Translation Lookaside Buffer</li>
 	<li>A small associative cache used for fast VMA-&gt;PMA translation</li>
@@ -1612,7 +1608,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>Unaligned access trap</h1>
+<h1>Unaligned Access Trap</h1>
 <ul>
 	<li>Some CPUs might trap when access is not naturally / 16 bytes aligned</li>
 		<ul>

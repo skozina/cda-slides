@@ -139,7 +139,7 @@ int ret = setsockopt(sockfd, SOL_SOCKET, SO_ATTACH_BPF, &amp;bpffd, sizeof(bpffd
 </div>
 
 <div class="slide">
-<h1>LLVM BPF compiler</h1>
+<h1>LLVM BPF Compiler</h1>
 <ul>
 	<li>Clang/LLVM has backend to generate eBPF bytecode</li>
     <li>Compiles C source into a special ELF file</li>
@@ -169,9 +169,8 @@ int bpf_prog1(struct pt_regs *ctx)
 	return 0;
 }
 </pre>
-<!-- Why not clang -target bpf ...? -->
 <pre>
-clang -Wall -O2 -emit-llvm -c kprobes_kern.c -o -| llc -march=bpf -filetype=obj -o kprobes_kern.o
+clang -Wall -O2 -target bpf -c kprobes_kern.c -o kprobes_kern.o
 </pre>
 <pre>
 // Userspace section
@@ -190,7 +189,7 @@ bpf_program__attach(prog)
 </div>
 
 <div class="slide">
-<h1>eBPF maps</h1>
+<h1>eBPF Maps</h1>
 <ul>
     <li>Generic key-value stores with arbitrary structure</li>
 	<li>Accessible from both userland and kernel</li>
@@ -247,7 +246,7 @@ enum bpf_map_type {
 </div>
 
 <div class="slide">
-<h1>eBPF commands & program types</h1>
+<h1>eBPF Commands &#38; Program Types</h1>
 <ul>
 	<li>eBPF allows loading of several types of programs</li>
     <ul>
@@ -281,10 +280,10 @@ enum bpf_cmd {
 </div>
 
 <div class="slide">
-<h1>eBPF functions</h1>
+<h1>eBPF Functions</h1>
 <ul>
-	<!-- Maybe mention that these functions are called BPF helpers and are listed in bpf-helpers(7)? -->
 	<li>eBPF instructions can be used to call certain specific functions</li>
+	<li>Also called BPF helpers, listed in bpf-helpers(7)</li>
 </ul>
 <pre>
 #define BPF_CALL        0x80    /* function call */
@@ -313,7 +312,7 @@ struct bpf_insn insns[] = {
 </div>
 
 <div class="slide">
-<h1>bpftool - inspecting BPF programs</h1>
+<h1>bpftool - Inspecting BPF Programs</h1>
 <ul>
     <li>bpftool prog list &mdash; list all loaded BPF programs</li>
     <li>bpftool prog dump xlated id &lt;ID&gt; &mdash; dump instructions of a BPF program</li>
@@ -420,7 +419,7 @@ Tracing... Hit Ctrl-C to end.
 </div>
 
 <div class="slide">
-<h1>High level eBPF language: bpftrace</h1>
+<h1>High Level eBPF Language: bpftrace</h1>
 <ul>
     <li>Single bpftrace program for both kernel (BPF) and userspace part</li>
     <li>Allows to write simple one-liner scripts for fast tracing</li>
