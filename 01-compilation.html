@@ -2,7 +2,7 @@
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-  <title>Binary Code Analysis - Agenda</title>
+  <title>Binary Code Analysis - Compilation, Linking, and Running Code</title>
   <meta name="copyright"
    content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -27,7 +27,7 @@
  <img src="images/Logo-RedHat-A-White-RGB.png" alt="RH logo" class="cover" />
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
- <h2>Compilation, linking, and running code</h2>
+ <h2>Compilation, Linking, and Running Code</h2>
  <p>Viktor Malík<br>
     Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
@@ -591,17 +591,16 @@ Dump of assembler code for function _start:
 <div class="slide">
 <h1>Running Code</h1>
 <ul>
-	<li>The kernel does:</li>
+	<li>The kernel:</li>
 	<ul>
 		<li>Maps the LOAD segments in the memory</li>
 		<li>Zeros out the NOBITS sections, eg. .bss</li>
-		<li>Examine if there's INTERP segment</li>
+		<li>Examines if there's an INTERP segment</li>
 		<ul>
 		<li>If yes, it maps this binary in the memory as well</li>
 		</ul>
-		<!-- This looks confusing to me, since the rest describes what happens at exec, which does not create a new process -->
-		<li>Creates a new process with given start address</li>
-        <li>Executes <b>dynamic interpreter</b></li>
+        <li>Executes the <b>dynamic interpreter</b></li>
+        <li>Executes the program itself</li>
 	</ul>
 </div>
 
@@ -610,7 +609,7 @@ Dump of assembler code for function _start:
 <ul>
     <li>Loads in all binaries listed in the DYNAMIC segment</li>
     <ul>
-        <li>Repeat recursively</li>
+        <li>Repeat recursively until no binaries are missing</li>
     </ul>
 <pre>
 $ readelf -d test
@@ -628,7 +627,7 @@ Dynamic section at offset 0xe28 contains 24 entries:
 
 <div class="slide cover">
  <br clear="all" />
- <h1>Other features</h1>
+ <h1>Other Features</h1>
 </div>
 
 <div class="slide">
@@ -715,8 +714,7 @@ $ ldd test
 	<li>Linker can further make .text, .data and .rodata located randomly</li>
 	<ul>
 		<li>So ASLR works for .text, .data and .rodata</li>
-		<!-- This is confusing, the linker does not enable ASLR, it only enables the executable to be randomized with it enabled -->
-		<li>Linker option -pie tells linker to enable ASLR for .text and .data</li>
+		<li>Linker option -pie</li>
 	</ul>
 	<li>-pie causes ELF type to switch from EXEC (executable) to DYN (shared object file)</li>
 	<li>Link address is set to 0 (determined by dynamic interpret)</li>

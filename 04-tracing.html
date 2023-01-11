@@ -2,7 +2,7 @@
  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-  <title>Binary Code Analysis - Live kernel tracing</title>
+  <title>Binary Code Analysis - Live Kernel Tracing</title>
   <meta name="copyright"
    content="Copyright &#169; 2016 Stanislav Kozina <skozina@redhat.com>" />
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -18,7 +18,7 @@
 <body>
 
 <div class="background">
-  <img id="head-icon" alt="graphic with four colored squares" src="images/bca.png" />
+  <img id="head-itcon" alt="graphic with four colored squares" src="images/bca.png" />
   <img src="images/Logo-RedHat-A-White-RGB.png" alt="RH logo" id="head-logo" />
 </div>
 
@@ -27,7 +27,7 @@
  <img src="images/Logo-RedHat-A-White-RGB.png" alt="RH logo" class="cover" />
  <br clear="all" />
  <h1>Binary Code Analysis</h1>
- <h2>Live kernel tracing</h2>
+ <h2>Live Kernel Tracing</h2>
  <p>Viktor Malík<br>
 Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
@@ -37,7 +37,7 @@ Manager, Software Engineering, Red Hat<br>
 </div>
 
 <div class="slide">
-<h1>Linux Performance Observability tools</h1>
+<h1>Linux Performance Observability Tools</h1>
 <img height=70% alt="Linux Performance Observability tools" src="images/linux_observability_tools.png"/>
 <p class="right grey">Source: http://www.brendangregg.com</p>
 </div>
@@ -140,7 +140,7 @@ static int __init kprobe_init(void)
 </div>
 
 <div class="slide">
-<h1>systemtap</h1>
+<h1>SystemTap</h1>
 <ul>
 	<li>Tool for analysis of live running Linux system</li>
 	<li>Allows analysis of both userland and kernel</li>
@@ -158,7 +158,7 @@ static int __init kprobe_init(void)
 </div>
 
 <div class="slide">
-<h1>systemtap</h1>
+<h1>SystemTap</h1>
 <pre>
 probe kernel.function("icmpv6_*").call
 {
