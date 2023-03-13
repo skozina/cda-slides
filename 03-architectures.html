@@ -1508,11 +1508,11 @@ Dump of assembler code for function main:
 
 <div class="slide cover">
  <br clear="all" />
- <h1>ARM (AArch)</h1>
+ <h1>Other architectures (interesting features)</h1>
 </div>
 
 <div class="slide">
-<h1>CPU Modes</h1>
+<h1>ARM32 CPU Modes</h1>
 <ul>
     <li>User &mdash; non-privileged</li>
     <li>FIQ &mdash; fast interrupt handling</li>
@@ -1525,7 +1525,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>AArch32 Register Shadowing</h1>
+<h1>ARM32 Register Shadowing</h1>
 <table class="border centered">
     <tr>
         <th>usr</th>
@@ -1569,7 +1569,7 @@ Dump of assembler code for function main:
 </div>
 
 <div class="slide">
-<h1>AArch64</h1>
+<h1>ARM64</h1>
 <ul>
 	<li>R0-R30 &mdash; general-purpose registers (with W0-W30 being the lower halves)</li>
     <li>R30 used for <em>link register</em></li>
@@ -1582,18 +1582,44 @@ Dump of assembler code for function main:
 </ul>
 </div>
 
-<div class="slide cover">
- <br clear="all" />
- <h1>Other Architectures</h1>
+<div class="slide">
+<h1>z/Architecture (s390x)</h1>
+<ul>
+    <li>Used on IBM's mainframe computers</li>
+    <li>64-bit addressing (allows for <b>16 exabytes</b> of memory)</li>
+    <li>Previous version (System/390) used only 31-bit addressing (2 GiB)</li>
+    <ul>
+        <li>Programs were able to create additional memory areas of 2 GiB (dataspaces and hiperspaces)</li>
+        <li>Expanded storage</li>
+        <ul>
+            <li>Page-addressable space (originally) separated from the main memory</li>
+            <li>Operated via MVPG (Move Page) instructions</li>
+            <li>Now discontinued (64-bit addressing is sufficient)</li>
+        </ul>
+    </ul>
+</ul>
 </div>
 
 <div class="slide">
-<h1>Branch Delay Slot</h1>
+<h1>RISC-V</h1>
+<ul>
+    <li><b>Open-source licensed</b> (i.e. free to use)</li>
+    <li>Academically developed (originally started at Berkeley)</li>
+    <li>Specification includes support for 128-bit words (reserved for now)</li>
+    <li>Wide support across operating systems/software tools</li>
+    <ul>
+        <li>Linux, FreeBSD, OpenBSD, NetBSD</li>
+        <li>GCC, LLVM, QEMU, ...</li>
+    </ul>
+</ul>
+</div>
+
+<div class="slide">
+<h1>Branch Delay Slot (MIPS and SPARC)</h1>
 <ul>
 	<li>One instruction after the current one is <em>always</em> executed</li>
 	<li>Even if the preceeding instruction has jumped elsewhere</li>
 	<li>This is because the next instruction is already in the CPU pipeline</li>
-	<li>This behavior can be seen on MIPS and SPARC CPUs.</li>
 </ul>
 </div>
 
