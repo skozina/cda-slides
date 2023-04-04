@@ -29,10 +29,10 @@
  <h1>Binary Code Analysis</h1>
  <h2>Live Kernel Tracing</h2>
  <p>Viktor Malík<br>
-    Software Engineer, Red Hat<br></p>
+    Senior Software Engineer, Red Hat<br></p>
  <p>Stanislav Kozina<br>
     Manager, Software Engineering, Red Hat<br></p>
- <p>&copy; January 2022</p>
+ <p>&copy; April 2023</p>
  </div>
 </div>
 
@@ -155,6 +155,9 @@ static int __init kprobe_init(void)
 # stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), ulong_arg(1)); }'
 -&gt; icmp_rcv(0xffff8f2316224200)
 -&gt; icmp_rcv(0xffff8f2316224700)
+# stap -v -e 'probe kernel.function("icmpv6_rcv") { printf("-&gt; %s(%p)\n", ppfunc(), $skb-&gt;len); }'
+-&gt; icmp_rcv(64)
+-&gt; icmp_rcv(64)
 </pre>
 </div>
 
@@ -310,6 +313,10 @@ List of pre-defined events (to be used in -e):
 
        1.182743924 seconds time elapsed
 </pre>
+</div>
+
+<div class="slide">
+<h1>perf</h1>
 <ul>
 	<li>Attaching to kprobes creates new event</li>
 </ul>
@@ -338,6 +345,16 @@ You can now use it in all perf tools, such as:
 # ........  ............
 #
    100.00%  (ffffffffb38
+</pre>
+<ul>
+	<li>Allows accessing kprobe arguments by name</li>
+</ul>
+<pre>
+# perf probe -V icmpv6_rcv
+Available variables at icmpv6_rcv
+        @<icmpv6_rcv+0>
+                struct sk_buff* skb
+# perf probe --add 'icmpv6_rcv skb-&gt;len'
 </pre>
 </div>
 
