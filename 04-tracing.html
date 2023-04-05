@@ -191,6 +191,36 @@ WARNING: function icmpv6_init is in blacklisted section: keyword at trace.stap:1
 </div>
 
 <div class="slide">
+<h1>SystemTap</h1>
+<ul>
+	<li>Allows for userspace tracing, too:</li>
+</ul>
+<pre>
+# stap -e 'probe process("./test").function("main").return { printf("Exit code: %d\n", $return); }'
+Exit code: 0
+</pre>
+<ul>
+	<li>Works for other languages (e.g. C++), incuding name (de)mangling:</li>
+</ul>
+<pre>
+# head main.cpp
+#include <iostream>
+
+struct Foo {
+    int x;
+    void print() {
+        std::cout &lt;&lt; x &lt;&lt; std::endl;
+    }
+};
+# nm main | grep print
+000000000040122c W _ZN3Bar5printEv
+00000000004011fe W _ZN3Foo5printEv
+# stap -e 'probe process("./main").function("Foo::print").return { printf("%s\n", ppfunc()); }'
+Foo::print
+</pre>
+</div>
+
+<div class="slide">
 <h1>ftrace</h1>
 <ul>
 	<li>Trace interface for set of given tracepoints</li>
