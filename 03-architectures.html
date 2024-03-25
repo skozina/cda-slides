@@ -29,10 +29,8 @@
  <h1>Binary Code Analysis</h1>
  <h2>Computer Architectures</h2>
  <p>Viktor Malík<br>
-    Software Engineer, Red Hat<br></p>
- <p>Stanislav Kozina<br>
-    Manager, Software Engineering, Red Hat<br></p>
- <p>&copy; January 2022</p>
+    Senior Software Engineer, Red Hat<br></p>
+ <p>&copy; March 2024</p>
  </div>
 </div>
 
@@ -1572,6 +1570,7 @@ Dump of assembler code for function main:
 <h1>ARM64</h1>
 <ul>
 	<li>R0-R30 &mdash; general-purpose registers (with W0-W30 being the lower halves)</li>
+    <li>R29 optionally used for <em>frame pointer</em></li>
     <li>R30 used for <em>link register</em></li>
     <li>R31 &mdash; <em>stack pointer</em> for instructions dealing with stack, <em>zero register</em> for others</em></li>
     <li>4 exception levels (EL0-EL3)</li>
